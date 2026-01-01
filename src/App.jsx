@@ -14,6 +14,11 @@ import {
   Grid,
   Activity,
 } from 'lucide-react';
+import { Camera, CameraResultType } from '@capacitor/camera';
+import { Geolocation } from '@capacitor/geolocation';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 const TaskTracker = () => {
   // ------------ state: tasks / habits ------------
@@ -94,12 +99,14 @@ const TaskTracker = () => {
   const [theme, setTheme] = useState(
     () => localStorage.getItem('sectograph_theme') || 'light'
   );
+  const [paddingTop, setPaddingTop] = useState(0);
+  const [paddingBottom, setPaddingBottom] = useState(0);
   const [showCustomization, setShowCustomization] = useState(false);
   const [showCompleted, setShowCompleted] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
-  const [viewMode, setViewMode] = useState('clock'); // clock | calendar | habits
+  const [viewMode, setViewMode] = useState('clock'); // clock | calendar | habits | stats
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [clockFormat, setClockFormat] = useState(
     () => localStorage.getItem('sectograph_clock_format') || '24'
@@ -166,9 +173,59 @@ const TaskTracker = () => {
   }, [clockStyle]);  
 
   useEffect(() => {
-    const t = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(t);
+    const handleViewportChange = () => {
+      if (window.visualViewport) {
+        const viewport = window.visualViewport;
+        const fullHeight = window.screen.height;
+        const visibleHeight = viewport.height;
+        const topInset = fullHeight - visibleHeight - (window.innerHeight - visibleHeight);
+        const bottomInset = Math.max(0, fullHeight - window.innerHeight);
+        
+        setPaddingTop(Math.max(0, topInset));
+        setPaddingBottom(Math.max(0, bottomInset));
+      }
+    };
+    
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      handleViewportChange(); // Initial call
+    }
+    
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('orientationchange', handleViewportChange);
+    
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
+      }
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('orientationchange', handleViewportChange);
+    };
   }, []);  
+
+  // Status bar configuration
+  useEffect(() => {
+    const setStatusBar = async () => {
+      try {
+        const info = await StatusBar.getInfo();
+        setPaddingTop(info.height || 24); // Default 24px if not available
+        
+        await StatusBar.setStyle({ style: theme === 'dark' ? Style.Dark : Style.Light });
+        await StatusBar.setBackgroundColor({ color: theme === 'dark' ? '#111827' : '#f3f4f6' });
+        
+        // Detect bottom safe area (approximate)
+        const vh = window.innerHeight;
+        const fullHeight = window.screen.height;
+        const bottomInset = Math.max(0, fullHeight - vh - (info.height || 24));
+        setPaddingBottom(bottomInset > 0 ? bottomInset : 0);
+      } catch (error) {
+        console.error('Status bar error:', error);
+        setPaddingTop(24); // Fallback
+        setPaddingBottom(0);
+      }
+    };
+    setStatusBar();
+  }, [theme]);
 
   // ------------ helpers ------------
 
@@ -200,6 +257,67 @@ const TaskTracker = () => {
     const ds = toDateStr(date);
     return tasks.filter((t) => (t.date || toDateStr(new Date())) === ds);
   };  
+
+  // ------------ mobile enhancements ------------
+
+  const takePhoto = async () => {
+    try {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+      });
+      return image.webPath;
+    } catch (error) {
+      console.error('Camera error:', error);
+      return null;
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      const position = await Geolocation.getCurrentPosition();
+      return {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+    } catch (error) {
+      console.error('Geolocation error:', error);
+      return null;
+    }
+  };
+
+  const vibrate = async (style = ImpactStyle.Light) => {
+    try {
+      await Haptics.impact({ style });
+    } catch (error) {
+      console.error('Haptics error:', error);
+    }
+  };
+
+  const scheduleNotification = async (task) => {
+    if (!task.reminder) return;
+    try {
+      const { display } = await LocalNotifications.requestPermissions();
+      if (display === 'granted') {
+        const [hours, minutes] = task.reminder.split(':').map(Number);
+        const reminderTime = new Date();
+        reminderTime.setHours(hours, minutes, 0, 0);
+        if (reminderTime > new Date()) {
+          await LocalNotifications.schedule({
+            notifications: [{
+              title: 'Task Reminder',
+              body: `Time for: ${task.name}`,
+              id: task.id,
+              schedule: { at: reminderTime }
+            }]
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Notification error:', error);
+    }
+  };
 
   // ------------ filtering + current task ------------
 
@@ -411,14 +529,21 @@ const TaskTracker = () => {
       priority: data.priority || 'medium',
       category: data.category || 'Other',
       notes: data.notes || '',
+      photos: data.photos || [],
+      location: data.location || null,
     };
     setTasks((prev) => [...prev, newTask]);
+    vibrate(ImpactStyle.Light);
+    if (newTask.reminder) {
+      scheduleNotification(newTask);
+    }
   };  
 
   const toggleTaskComplete = (id) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
+    vibrate(ImpactStyle.Medium);
   };  
 
   const deleteTask = (id) => {
@@ -696,7 +821,7 @@ const TaskTracker = () => {
           </div>
         </div>
 
-        <div className="relative w-full aspect-square max-w-sm mx-auto">
+        <div className="relative w-full aspect-square max-w-sm max-h-64 mx-auto">
           <svg viewBox="0 0 400 400" className="w-full h-full">
             <circle
               cx="200"
@@ -993,7 +1118,7 @@ const TaskTracker = () => {
           </div>
         </div>
 
-        <div className="relative w-full aspect-square max-w-sm mx-auto">
+        <div className="relative w-full aspect-square max-w-sm max-h-64 mx-auto">
           <svg viewBox="0 0 400 400" className="w-full h-full">
             <circle
               cx="200"
@@ -1668,6 +1793,108 @@ const TaskTracker = () => {
     );
   };
 
+  const StatsView = () => {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.completed).length;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    
+    const totalHabits = habits.length;
+    const activeHabits = habits.filter(h => h.completions && Object.keys(h.completions).length > 0).length;
+    
+    const todayTasks = getTasksForDate(new Date());
+    const todayCompleted = todayTasks.filter(t => t.completed).length;
+    const todayTotal = todayTasks.length;
+    const todayRate = todayTotal > 0 ? Math.round((todayCompleted / todayTotal) * 100) : 0;
+
+    return (
+      <div
+        className={`${
+          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+        } rounded-3xl shadow-2xl p-6 border ${
+          theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+        }`}
+      >
+        <h2
+          className={`text-2xl font-bold mb-6 ${
+            theme === 'dark' ? 'text-white' : 'text-gray-900'
+          }`}
+        >
+          Statistics
+        </h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="text-center">
+            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+              {totalTasks}
+            </div>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Total Tasks
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+              {completionRate}%
+            </div>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Completion Rate
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}`}>
+              {totalHabits}
+            </div>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Total Habits
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-orange-400' : 'text-orange-600'}`}>
+              {todayRate}%
+            </div>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Today
+            </div>
+          </div>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Task Categories
+            </h3>
+            <div className="space-y-2">
+              {categories.map(category => {
+                const count = tasks.filter(t => t.category === category).length;
+                const percentage = totalTasks > 0 ? Math.round((count / totalTasks) * 100) : 0;
+                return (
+                  <div key={category} className="flex items-center justify-between">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {category}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500" 
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {count}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ------------ main UI ------------
 
   return (
@@ -1677,8 +1904,9 @@ const TaskTracker = () => {
           ? 'bg-gray-900 text-white min-h-screen'
           : 'bg-gray-100 text-gray-900 min-h-screen'
       }
+      style={{ paddingTop: `${paddingTop}px`, paddingBottom: `${paddingBottom}px` }}
     >
-      <div className="max-w-5xl mx-auto p-4 md:p-6">
+      <div className="max-w-5xl mx-auto p-4 md:p-6 overflow-y-auto">
         {/* header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -1697,13 +1925,13 @@ const TaskTracker = () => {
               onClick={() =>
                 setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
               }
-              className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+              className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
             </button>
             <button
               onClick={() => setShowCustomization((v) => !v)}
-              className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+              className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <Settings size={18} />
             </button>
@@ -1789,11 +2017,11 @@ const TaskTracker = () => {
         </div>
 
         {/* view mode buttons */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-2">
+        <div className="mb-4 space-y-3">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setViewMode('clock')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 whitespace-nowrap ${
                 viewMode === 'clock'
                   ? 'bg-blue-500 text-white'
                   : theme === 'dark'
@@ -1806,7 +2034,7 @@ const TaskTracker = () => {
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 whitespace-nowrap ${
                 viewMode === 'calendar'
                   ? 'bg-blue-500 text-white'
                   : theme === 'dark'
@@ -1819,7 +2047,7 @@ const TaskTracker = () => {
             </button>
             <button
               onClick={() => setViewMode('habits')}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 whitespace-nowrap ${
                 viewMode === 'habits'
                   ? 'bg-blue-500 text-white'
                   : theme === 'dark'
@@ -1830,14 +2058,29 @@ const TaskTracker = () => {
               <Grid size={14} />
               Habits
             </button>
+            <button
+              onClick={() => setViewMode('stats')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1 whitespace-nowrap ${
+                viewMode === 'stats'
+                  ? 'bg-blue-500 text-white'
+                  : theme === 'dark'
+                  ? 'bg-gray-800 text-gray-300'
+                  : 'bg-gray-100 text-gray-700'
+              }`}
+            >
+              <Activity size={14} />
+              Stats
+            </button>
           </div>
-          <button
-            onClick={() => setShowAddTask(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold"
-          >
-            <Plus size={14} />
-            Task
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={() => setShowAddTask(true)}
+              className="flex items-center gap-1 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold"
+            >
+              <Plus size={14} />
+              Add Task
+            </button>
+          </div>
         </div>
 
         {/* customization panel minimal */}
@@ -1969,7 +2212,7 @@ const TaskTracker = () => {
 
             {viewMode === 'habits' && (
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2 space-y-3">
                   <h2
                     className={`text-xl font-bold ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -1977,13 +2220,15 @@ const TaskTracker = () => {
                   >
                     Habits
                   </h2>
-                  <button
-                    onClick={() => setShowAddHabit(true)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold"
-                  >
-                    <Plus size={14} />
-                    Add
-                  </button>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setShowAddHabit(true)}
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold"
+                    >
+                      <Plus size={14} />
+                      Add Habit
+                    </button>
+                  </div>
                 </div>
 
                 {showAddHabit && (
@@ -2001,6 +2246,8 @@ const TaskTracker = () => {
                 <HabitDashboard />
               </div>
             )}
+
+            {viewMode === 'stats' && <StatsView />}
           </div>
 
           <div className="space-y-4">
