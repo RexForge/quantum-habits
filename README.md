@@ -1,16 +1,86 @@
-# React + Vite
+# HabitForge - Mobile Habit Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, mobile-first habit tracking app built with React, Vite, Tailwind CSS, and Capacitor for cross-platform mobile deployment.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Task Management**: Create, edit, and track tasks with start/end times, priorities, categories, and notes
+- **Habit Tracking**: Build and maintain daily habits with streak counters and completion tracking
+- **Multiple Views**: Clock view (arc/pie), calendar view, habits dashboard, and statistics
+- **Mobile Native Features**:
+  - Native push notifications for reminders
+  - Camera integration for task photos
+  - Location tracking for tasks
+  - Haptic feedback on interactions
+- **Responsive Design**: Optimized for mobile and desktop
+- **Themes**: Light and dark mode support
+- **Data Persistence**: Local storage for all data
+- **Customization**: Colors, icons, clock styles, and more
 
-## React Compiler
+## Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Web Development
+```bash
+npm install
+npm run dev
+```
 
-## Expanding the ESLint configuration
+### Mobile App Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This app can be built as a native mobile app using Capacitor.
+
+#### Prerequisites
+- Node.js and npm
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+#### Setup
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Build the web app:
+   ```bash
+   npm run build
+   ```
+
+3. Sync to mobile platforms:
+   ```bash
+   npm run cap:sync
+   ```
+
+#### Android
+1. Install Android Studio from https://developer.android.com/studio
+2. Open the Android project:
+   ```bash
+   npm run cap:android
+   ```
+3. In Android Studio, build and run on emulator or device
+
+#### iOS (macOS only)
+1. Install Xcode from App Store
+2. Add iOS platform:
+   ```bash
+   npx cap add ios
+   ```
+3. Open in Xcode:
+   ```bash
+   npx cap open ios
+   ```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run cap:build` - Build and sync to mobile
+- `npm run cap:android` - Open Android project in Android Studio
+- `npm run cap:sync` - Sync web assets to all platforms
+
+## Technologies Used
+
+- React 19
+- Vite
+- Tailwind CSS
+- Capacitor
+- Lucide React (icons)
