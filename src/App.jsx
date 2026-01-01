@@ -179,7 +179,20 @@ const TaskTracker = () => {
         const fullHeight = window.screen.height;
         const visibleHeight = viewport.height;
         const topInset = fullHeight - visibleHeight - (window.innerHeight - visibleHeight);
-        const bottomInset = Math.max(0, fullHeight - window.innerHeight);
+        
+        // Improved bottom safe area calculation
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        let bottomInset = 0;
+        
+        if (isAndroid) {
+          const potentialNavBarHeight = fullHeight - window.innerHeight;
+          // Android navigation bar is usually between 48-80px
+          if (potentialNavBarHeight > 40 && potentialNavBarHeight < 120) {
+            bottomInset = potentialNavBarHeight;
+          } else {
+            bottomInset = 48; // Default Android navigation bar height
+          }
+        }
         
         setPaddingTop(Math.max(0, topInset));
         setPaddingBottom(Math.max(0, bottomInset));
@@ -213,15 +226,31 @@ const TaskTracker = () => {
         await StatusBar.setStyle({ style: theme === 'dark' ? Style.Dark : Style.Light });
         await StatusBar.setBackgroundColor({ color: theme === 'dark' ? '#111827' : '#f3f4f6' });
         
-        // Detect bottom safe area (approximate)
-        const vh = window.innerHeight;
-        const fullHeight = window.screen.height;
-        const bottomInset = Math.max(0, fullHeight - vh - (info.height || 24));
-        setPaddingBottom(bottomInset > 0 ? bottomInset : 0);
+        // Improved bottom safe area detection for Android navigation bar
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        let bottomInset = 0;
+        
+        if (isAndroid) {
+          // On Android, navigation bar is typically 48-56dp, but can vary
+          // Use a more conservative estimate based on viewport differences
+          const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+          const screenHeight = window.screen.height;
+          const potentialNavBarHeight = screenHeight - window.innerHeight;
+          
+          // Android navigation bar is usually between 48-80px
+          if (potentialNavBarHeight > 40 && potentialNavBarHeight < 120) {
+            bottomInset = potentialNavBarHeight;
+          } else {
+            // Fallback: assume standard navigation bar height
+            bottomInset = 48;
+          }
+        }
+        
+        setPaddingBottom(Math.max(0, bottomInset));
       } catch (error) {
         console.error('Status bar error:', error);
         setPaddingTop(24); // Fallback
-        setPaddingBottom(0);
+        setPaddingBottom(48); // Default Android navigation bar height
       }
     };
     setStatusBar();
@@ -1005,7 +1034,7 @@ const TaskTracker = () => {
           >
             <ChevronLeft
               size={20}
-              className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+              className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
             />
           </button>
           <button
@@ -1014,7 +1043,7 @@ const TaskTracker = () => {
           >
             <ChevronRight
               size={20}
-              className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+              className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
             />
           </button>
         </div>
@@ -1309,7 +1338,7 @@ const TaskTracker = () => {
           >
             <ChevronLeft
               size={20}
-              className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+              className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
             />
           </button>
           <button
@@ -1318,7 +1347,7 @@ const TaskTracker = () => {
           >
             <ChevronRight
               size={20}
-              className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+              className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
             />
           </button>
         </div>
@@ -1424,7 +1453,7 @@ const TaskTracker = () => {
             >
               <ChevronLeft
                 size={20}
-                className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+                className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
               />
             </button>
             <button
@@ -1437,7 +1466,7 @@ const TaskTracker = () => {
             >
               <ChevronRight
                 size={20}
-                className={theme === 'dark' ? 'text-white' : 'text-gray-700'}
+                className={theme === 'dark' ? 'text-white' : 'text-gray-900'}
               />
             </button>
           </div>
@@ -1906,7 +1935,7 @@ const TaskTracker = () => {
       }
       style={{ paddingTop: `${paddingTop}px`, paddingBottom: `${paddingBottom}px` }}
     >
-      <div className="max-w-5xl mx-auto p-4 md:p-6 overflow-y-auto">
+      <div className="max-w-5xl mx-auto p-4 md:p-6 overflow-y-auto pb-20 md:pb-6">
         {/* header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -1955,7 +1984,7 @@ const TaskTracker = () => {
                 onClick={() => navigateDate(-1)}
                 className="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={16} className="text-gray-900 dark:text-white" />
               </button>
               <button
                 onClick={goToToday}
@@ -1967,7 +1996,7 @@ const TaskTracker = () => {
                 onClick={() => navigateDate(1)}
                 className="p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={16} className="text-gray-900 dark:text-white" />
               </button>
             </div>
           </div>
