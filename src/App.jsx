@@ -117,6 +117,9 @@ const TaskTracker = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showAddTask, setShowAddTask] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editingHabit, setEditingHabit] = useState(null);
+  const [selectedTasks, setSelectedTasks] = useState(new Set());
 
   // controlled new-task form
   const [newTaskName, setNewTaskName] = useState('');
@@ -173,48 +176,28 @@ const TaskTracker = () => {
   }, [clockStyle]);  
 
   useEffect(() => {
+    if (!window.visualViewport) return;
+
+    const initialHeight = window.visualViewport.height;
     const handleViewportChange = () => {
-      if (window.visualViewport) {
-        const viewport = window.visualViewport;
-        const fullHeight = window.screen.height;
-        const visibleHeight = viewport.height;
-        const topInset = fullHeight - visibleHeight - (window.innerHeight - visibleHeight);
-        
-        // Improved bottom safe area calculation
-        const isAndroid = /Android/i.test(navigator.userAgent);
-        let bottomInset = 0;
-        
-        if (isAndroid) {
-          const potentialNavBarHeight = fullHeight - window.innerHeight;
-          // Android navigation bar is usually between 48-80px
-          if (potentialNavBarHeight > 40 && potentialNavBarHeight < 120) {
-            bottomInset = potentialNavBarHeight;
-          } else {
-            bottomInset = 48; // Default Android navigation bar height
-          }
-        }
-        
-        setPaddingTop(Math.max(0, topInset));
-        setPaddingBottom(Math.max(0, bottomInset));
-      }
+      const viewport = window.visualViewport;
+      const heightDiff = initialHeight - viewport.height;
+
+      // Treat >150px reduction as keyboard
+      const keyboardHeight = heightDiff > 150 ? heightDiff : 0;
+
+      // Only adjust bottom padding; top is controlled by status bar effect
+      setPaddingBottom((prev) => Math.max(prev, keyboardHeight));
     };
-    
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleViewportChange);
-      handleViewportChange(); // Initial call
-    }
-    
-    window.addEventListener('resize', handleViewportChange);
-    window.addEventListener('orientationchange', handleViewportChange);
-    
+
+    window.visualViewport.addEventListener('resize', handleViewportChange);
+    handleViewportChange();
+
     return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleViewportChange);
-      }
-      window.removeEventListener('resize', handleViewportChange);
-      window.removeEventListener('orientationchange', handleViewportChange);
+      window.visualViewport.removeEventListener('resize', handleViewportChange);
     };
-  }, []);  
+  }, []);
+
 
   // Status bar configuration
   useEffect(() => {
@@ -258,7 +241,12 @@ const TaskTracker = () => {
 
   // ------------ helpers ------------
 
-  const toDateStr = (d) => d.toISOString().split('T')[0];  
+  const toDateStr = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };  
 
   const formatTime = (date, use12 = false) => {
     return date.toLocaleTimeString('en-US', {
@@ -579,6 +567,59 @@ const TaskTracker = () => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
   };  
 
+  const editTask = (id, data) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              name: data.name,
+              description: data.description || '',
+              startTime: data.startTime,
+              endTime: data.endTime,
+              duration: data.duration,
+              color: data.color || t.color,
+              icon: data.icon || t.icon,
+              date: data.date || t.date,
+              recurring: data.recurring || t.recurring,
+              reminder: data.reminder || t.reminder,
+              priority: data.priority || t.priority,
+              category: data.category || t.category,
+              notes: data.notes || t.notes,
+              photos: data.photos || t.photos,
+              location: data.location || t.location,
+            }
+          : t
+      )
+    );
+    vibrate(ImpactStyle.Light);
+    // Update notification if reminder changed
+    if (data.reminder && data.reminder !== tasks.find(t => t.id === id)?.reminder) {
+      const updatedTask = { ...tasks.find(t => t.id === id), ...data };
+      scheduleNotification(updatedTask);
+    }
+  };
+
+  const editHabit = (id, data) => {
+    setHabits((prev) =>
+      prev.map((h) =>
+        h.id === id
+          ? {
+              ...h,
+              name: data.name,
+              description: data.description || '',
+              color: data.color || h.color,
+              icon: data.icon || h.icon,
+              frequencyType: data.frequencyType || h.frequencyType,
+              targetCount: data.targetCount || h.targetCount,
+              reminderTime: data.reminderTime || h.reminderTime,
+            }
+          : h
+      )
+    );
+    vibrate(ImpactStyle.Light);
+  };  
+
   const navigateTask = (dir) => {
     if (!currentTasks.length) return;
     setCurrentTaskIndex((prev) => {
@@ -596,6 +637,47 @@ const TaskTracker = () => {
   };  
 
   const goToToday = () => setSelectedDate(new Date());  
+
+  // ------------ bulk operations ------------
+  
+  const toggleTaskSelection = (taskId) => {
+    setSelectedTasks((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllTasks = () => {
+    const allIds = filteredTasks.map(t => t.id);
+    setSelectedTasks(new Set(allIds));
+  };
+
+  const clearTaskSelection = () => {
+    setSelectedTasks(new Set());
+  };
+
+  const bulkCompleteTasks = () => {
+    selectedTasks.forEach(id => {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, completed: true } : t))
+      );
+    });
+    setSelectedTasks(new Set());
+    vibrate(ImpactStyle.Medium);
+  };
+
+  const bulkDeleteTasks = () => {
+    if (window.confirm(`Delete ${selectedTasks.size} selected tasks?`)) {
+      setTasks((prev) => prev.filter((t) => !selectedTasks.has(t.id)));
+      setSelectedTasks(new Set());
+      vibrate(ImpactStyle.Heavy);
+    }
+  };
 
   // ------------ new task submit (controlled) ------------
 
@@ -619,6 +701,69 @@ const TaskTracker = () => {
   };  
 
   // ------------ subcomponents ------------
+
+  const Modal = ({ isOpen, onClose, children, className = '' }) => {
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    useEffect(() => {
+      if (!isOpen) return;
+
+      const handleViewportChange = () => {
+        if (window.visualViewport) {
+          const viewport = window.visualViewport;
+          const currentHeight = viewport.height;
+          const windowHeight = window.innerHeight;
+          const heightDiff = windowHeight - currentHeight;
+          
+          // Detect keyboard (significant height reduction)
+          const isKeyboardShown = heightDiff > 150;
+          setKeyboardVisible(isKeyboardShown);
+        }
+      };
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleViewportChange);
+      }
+
+      return () => {
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', handleViewportChange);
+        }
+      };
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
+    // Prevent modal from closing when keyboard is visible
+    const handleBackdropClick = (e) => {
+      if (!keyboardVisible) {
+        onClose();
+      }
+    };
+
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={handleBackdropClick}
+        />
+        
+        {/* Modal */}
+        <div
+          className={`fixed z-50 ${className}`}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          {children}
+        </div>
+      </>
+    );
+  };
 
   const WidgetDashboard = () => {
     const today = toDateStr(new Date());
@@ -813,6 +958,33 @@ const TaskTracker = () => {
               No upcoming tasks
             </p>
           )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h3
+            className={`text-sm font-semibold mb-3 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setShowAddTask(true)}
+              className="flex items-center gap-2 p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+            >
+              <Plus size={16} />
+              <span className="text-sm font-medium">Add Task</span>
+            </button>
+            <button
+              onClick={() => setShowAddHabit(true)}
+              className="flex items-center gap-2 p-3 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
+            >
+              <Grid size={16} />
+              <span className="text-sm font-medium">Add Habit</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1065,18 +1237,28 @@ const TaskTracker = () => {
             currentTasks.slice(0, 3).map((t) => (
               <div
                 key={t.id}
-                onClick={() => setSelectedTask(t)}
-                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all ${
-                  theme === 'dark'
+                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all group ${
+                  selectedTasks.has(t.id)
+                    ? theme === 'dark'
+                      ? 'bg-blue-900/30 border-2 border-blue-500'
+                      : 'bg-blue-50 border-2 border-blue-500'
+                    : theme === 'dark'
                     ? 'bg-gray-700/50 hover:bg-gray-700'
                     : 'bg-gray-50 hover:bg-gray-100'
                 }`}
               >
+                <input
+                  type="checkbox"
+                  checked={selectedTasks.has(t.id)}
+                  onChange={() => toggleTaskSelection(t.id)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: t.color }}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0" onClick={() => setSelectedTask(t)}>
                   <p
                     className={`text-sm font-semibold truncate ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -1096,6 +1278,49 @@ const TaskTracker = () => {
                       : `${t.startTime} – ${t.endTime}`}{' '}
                     · {Math.floor(t.duration / 60)}h {t.duration % 60}m
                   </p>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!t.completed && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTaskCompletion(t.id);
+                      }}
+                      className="p-1 rounded-md hover:bg-green-100 dark:hover:bg-green-900/30 text-green-500"
+                      title="Mark as completed"
+                    >
+                      <CheckCircle size={14} />
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setModalPosition({
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2,
+                      });
+                      setEditingTask(t);
+                    }}
+                    className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}
+                    title="Edit task"
+                  >
+                    <Settings size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm('Delete this task?')) {
+                        deleteTask(t.id);
+                      }
+                    }}
+                    className={`p-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500`}
+                    title="Delete task"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
                 {t.completed && (
                   <CheckCircle
@@ -1369,18 +1594,28 @@ const TaskTracker = () => {
             currentTasks.slice(0, 3).map((t) => (
               <div
                 key={t.id}
-                onClick={() => setSelectedTask(t)}
-                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all ${
-                  theme === 'dark'
+                className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all group ${
+                  selectedTasks.has(t.id)
+                    ? theme === 'dark'
+                      ? 'bg-blue-900/30 border-2 border-blue-500'
+                      : 'bg-blue-50 border-2 border-blue-500'
+                    : theme === 'dark'
                     ? 'bg-gray-700/50 hover:bg-gray-700'
                     : 'bg-gray-50 hover:bg-gray-100'
                 }`}
               >
+                <input
+                  type="checkbox"
+                  checked={selectedTasks.has(t.id)}
+                  onChange={() => toggleTaskSelection(t.id)}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: t.color }}
                 />
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0" onClick={() => setSelectedTask(t)}>
                   <p
                     className={`text-sm font-semibold truncate ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -1400,6 +1635,49 @@ const TaskTracker = () => {
                       : `${t.startTime} – ${t.endTime}`}{' '}
                     · {Math.floor(t.duration / 60)}h {t.duration % 60}m
                   </p>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!t.completed && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleTaskCompletion(t.id);
+                      }}
+                      className="p-1 rounded-md hover:bg-green-100 dark:hover:bg-green-900/30 text-green-500"
+                      title="Mark as completed"
+                    >
+                      <CheckCircle size={14} />
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setModalPosition({
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2,
+                      });
+                      setEditingTask(t);
+                    }}
+                    className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}
+                    title="Edit task"
+                  >
+                    <Settings size={14} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm('Delete this task?')) {
+                        deleteTask(t.id);
+                      }
+                    }}
+                    className={`p-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500`}
+                    title="Delete task"
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
                 {t.completed && (
                   <CheckCircle
@@ -1533,6 +1811,455 @@ const TaskTracker = () => {
             );
           })}
         </div>
+      </div>
+    );
+  };
+
+  const TaskEditForm = ({ task, onSave, onCancel }) => {
+    const [name, setName] = useState(task.name);
+    const [description, setDescription] = useState(task.description || '');
+    const [startTime, setStartTime] = useState(task.startTime);
+    const [endTime, setEndTime] = useState(task.endTime);
+    const [color, setColor] = useState(task.color);
+    const [icon, setIcon] = useState(task.icon || '');
+    const [priority, setPriority] = useState(task.priority || 'medium');
+    const [category, setCategory] = useState(task.category || 'Other');
+    const [notes, setNotes] = useState(task.notes || '');
+    const [reminder, setReminder] = useState(task.reminder || '');
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (!name.trim() || !startTime || !endTime) return;
+
+      const start = new Date(`2000-01-01T${startTime}`);
+      const end = new Date(`2000-01-01T${endTime}`);
+      const duration = Math.round((end - start) / (1000 * 60));
+
+      onSave({
+        name: name.trim(),
+        description: description.trim(),
+        startTime,
+        endTime,
+        duration,
+        color,
+        icon,
+        priority,
+        category,
+        notes: notes.trim(),
+        reminder: reminder || null,
+      });
+    };
+
+    return (
+      <div
+        className={`rounded-2xl p-4 border ${
+          theme === 'dark'
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3
+            className={`font-semibold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            Edit Task
+          </h3>
+          <button
+            onClick={onCancel}
+            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Task Name
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter task name"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Start Time
+              </label>
+              <input
+                type="time"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                End Time
+              </label>
+              <input
+                type="time"
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Description
+            </label>
+            <textarea
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Task description (optional)"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Priority
+              </label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Category
+              </label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Color
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {colorPalette.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      color === c ? 'border-gray-900 scale-110' : 'border-gray-300'
+                    } transition-transform`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Icon
+              </label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={icon}
+                onChange={(e) => setIcon(e.target.value)}
+              >
+                <option value="">No icon</option>
+                {iconOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Notes
+            </label>
+            <textarea
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              rows={2}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Additional notes (optional)"
+            />
+          </div>
+
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Reminder (optional)
+            </label>
+            <input
+              type="time"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={reminder || ''}
+              onChange={(e) => setReminder(e.target.value)}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3 py-2 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
+  const HabitEditForm = ({ habit, onSave, onCancel }) => {
+    const [name, setName] = useState(habit.name);
+    const [frequencyType, setFrequencyType] = useState(habit.frequencyType);
+    const [targetCount, setTargetCount] = useState(habit.targetCount);
+    const [color, setColor] = useState(habit.color);
+    const [icon, setIcon] = useState(habit.icon);
+    const [reminderTime, setReminderTime] = useState(habit.reminderTime || '');
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (!name.trim()) return;
+      onSave({
+        name: name.trim(),
+        description: '',
+        color,
+        icon,
+        frequencyType,
+        targetCount: Number(targetCount) || 1,
+        reminderTime: reminderTime || null,
+      });
+    };
+
+    return (
+      <div
+        className={`rounded-2xl p-4 border ${
+          theme === 'dark'
+            ? 'bg-gray-800 border-gray-700'
+            : 'bg-white border-gray-200'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3
+            className={`font-semibold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            Edit Habit
+          </h3>
+          <button
+            onClick={onCancel}
+            className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Habit Name
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter habit name"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Frequency
+              </label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={frequencyType}
+                onChange={(e) => setFrequencyType(e.target.value)}
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Per week</option>
+                <option value="monthly">Per month</option>
+              </select>
+            </div>
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Target
+              </label>
+              <input
+                type="number"
+                min={1}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={targetCount}
+                onChange={(e) => setTargetCount(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Color
+              </label>
+              <div className="flex flex-wrap gap-1">
+                {colorPalette.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      color === c ? 'border-gray-900 scale-110' : 'border-gray-300'
+                    } transition-transform`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <label
+                className={`block text-sm mb-1 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              >
+                Icon
+              </label>
+              <select
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={icon}
+                onChange={(e) => setIcon(e.target.value)}
+              >
+                {iconOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              className={`block text-sm mb-1 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              Reminder (optional)
+            </label>
+            <input
+              type="time"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={reminderTime || ''}
+              onChange={(e) => setReminderTime(e.target.value)}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3 py-2 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
       </div>
     );
   };
@@ -1748,7 +2475,7 @@ const TaskTracker = () => {
                   >
                     {habit.icon}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <div
                       className={`text-sm font-semibold ${
                         theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -1770,22 +2497,65 @@ const TaskTracker = () => {
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div
-                    className={`text-xs font-semibold ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
-                    }`}
-                  >
-                    {periodTotal}/{target}
-                  </div>
-                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
                     <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${ratio * 100}%`,
-                        backgroundColor: habit.color,
+                      className={`text-xs font-semibold ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}
+                    >
+                      {periodTotal}/{target}
+                    </div>
+                    <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${ratio * 100}%`,
+                          backgroundColor: habit.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Quick complete today's habit */}
+                    <button
+                      onClick={() => toggleHabitCompletion(habit.id, new Date())}
+                      className={`px-2 py-1 rounded-md text-xs font-semibold transition-all ${
+                        (habit.completions || {})[todayStr] > 0
+                          ? 'bg-green-500 text-white hover:bg-green-600'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      }`}
+                      title={(habit.completions || {})[todayStr] > 0 ? 'Mark incomplete' : 'Complete today'}
+                    >
+                      {(habit.completions || {})[todayStr] > 0 ? '✓ Done' : 'Complete'}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setModalPosition({
+                          x: rect.left + rect.width / 2,
+                          y: rect.top + rect.height / 2,
+                        });
+                        setEditingHabit(habit);
                       }}
-                    />
+                      className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}
+                      title="Edit habit"
+                    >
+                      <Settings size={14} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Delete this habit? This will remove all completion data.')) {
+                          setHabits((prev) => prev.filter((h) => h.id !== habit.id));
+                        }
+                      }}
+                      className={`p-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500`}
+                      title="Delete habit"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2110,6 +2880,36 @@ const TaskTracker = () => {
               Add Task
             </button>
           </div>
+
+          {/* bulk operations */}
+          {selectedTasks.size > 0 && (
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={selectAllTasks}
+                className="px-3 py-1 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Select All ({filteredTasks.length})
+              </button>
+              <button
+                onClick={clearTaskSelection}
+                className="px-3 py-1 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Clear ({selectedTasks.size})
+              </button>
+              <button
+                onClick={bulkCompleteTasks}
+                className="px-3 py-1 rounded-lg text-sm bg-green-500 text-white hover:bg-green-600"
+              >
+                Complete ({selectedTasks.size})
+              </button>
+              <button
+                onClick={bulkDeleteTasks}
+                className="px-3 py-1 rounded-lg text-sm bg-red-500 text-white hover:bg-red-600"
+              >
+                Delete ({selectedTasks.size})
+              </button>
+            </div>
+          )}
         </div>
 
         {/* customization panel minimal */}
@@ -2129,107 +2929,211 @@ const TaskTracker = () => {
         )}
 
         {/* search */}
-        <div className="mb-4 flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tasks"
-              className={
+        <div className="mb-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search tasks"
+                className={
+                  theme === 'dark'
+                    ? 'w-full pl-9 pr-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    : 'w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                }
+              />
+            </div>
+          </div>
+
+          {/* filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className={`px-3 py-1 rounded-lg border text-sm ${
                 theme === 'dark'
-                  ? 'w-full pl-9 pr-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  : 'w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500'
-              }
-            />
+                  ? 'bg-gray-800 border-gray-700 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="all">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              className={`px-3 py-1 rounded-lg border text-sm ${
+                theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="all">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+
+            <label className="flex items-center gap-1 text-sm">
+              <input
+                type="checkbox"
+                checked={showCompleted}
+                onChange={(e) => setShowCompleted(e.target.checked)}
+                className="rounded"
+              />
+              <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+                Show Completed
+              </span>
+            </label>
           </div>
         </div>
 
         {/* new task form */}
-        {showAddTask && (
-          <div className="mb-4">
-            <div
+        <Modal
+          isOpen={showAddTask}
+          onClose={() => {
+            setShowAddTask(false);
+            setNewTaskName('');
+            setNewTaskStart('');
+            setNewTaskEnd('');
+          }}
+          className={
+            theme === 'dark'
+              ? 'bg-gray-800 border border-gray-700 rounded-2xl p-4 w-80 max-w-[90vw]'
+              : 'bg-white border border-gray-200 rounded-2xl p-4 w-80 max-w-[90vw]'
+          }
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3
               className={
                 theme === 'dark'
-                  ? 'bg-gray-800 border border-gray-700 rounded-2xl p-4'
-                  : 'bg-white border border-gray-200 rounded-2xl p-4'
+                  ? 'text-white font-semibold'
+                  : 'text-gray-900 font-semibold'
               }
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3
-                  className={
-                    theme === 'dark'
-                      ? 'text-white font-semibold'
-                      : 'text-gray-900 font-semibold'
-                  }
-                >
-                  New Task
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowAddTask(false);
-                    setNewTaskName('');
-                    setNewTaskStart('');
-                    setNewTaskEnd('');
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <form onSubmit={submitNewTask} className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Task name"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
-                  value={newTaskName}
-                  onChange={(e) => setNewTaskName(e.target.value)}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs mb-1">Start</label>
-                    <input
-                      type="time"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
-                      value={newTaskStart}
-                      onChange={(e) => setNewTaskStart(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs mb-1">End</label>
-                    <input
-                      type="time"
-                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
-                      value={newTaskEnd}
-                      onChange={(e) => setNewTaskEnd(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddTask(false);
-                      setNewTaskName('');
-                      setNewTaskStart('');
-                      setNewTaskEnd('');
-                    }}
-                    className="px-3 py-2 rounded-lg text-sm border border-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-500 text-white"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
+              New Task
+            </h3>
+            <button
+              onClick={() => {
+                setShowAddTask(false);
+                setNewTaskName('');
+                setNewTaskStart('');
+                setNewTaskEnd('');
+              }}
+              className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <X size={16} />
+            </button>
           </div>
-        )}
+          <form onSubmit={submitNewTask} className="space-y-3">
+            <input
+              type="text"
+              placeholder="Task name"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+              value={newTaskName}
+              onChange={(e) => setNewTaskName(e.target.value)}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs mb-1">Start</label>
+                <input
+                  type="time"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+                  value={newTaskStart}
+                  onChange={(e) => setNewTaskStart(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1">End</label>
+                <input
+                  type="time"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+                  value={newTaskEnd}
+                  onChange={(e) => setNewTaskEnd(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddTask(false);
+                  setNewTaskName('');
+                  setNewTaskStart('');
+                  setNewTaskEnd('');
+                }}
+                className="px-3 py-2 rounded-lg text-sm border border-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-500 text-white"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </Modal>
+
+        {/* edit task form */}
+        <Modal
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          className={
+            theme === 'dark'
+              ? 'bg-gray-800 border border-gray-700 rounded-2xl p-4 w-full max-w-md mx-auto'
+              : 'bg-white border border-gray-200 rounded-2xl p-4 w-full max-w-md mx-auto'
+          }
+        >
+          {editingTask && (
+            <TaskEditForm
+              task={editingTask}
+              onSave={(data) => {
+                editTask(editingTask.id, data);
+                setEditingTask(null);
+                
+              }}
+              onCancel={() => {
+                setEditingTask(null);
+                
+              }}
+            />
+          )}
+        </Modal>
+
+        {/* edit habit form */}
+        <Modal
+          isOpen={!!editingHabit}
+          onClose={() => setEditingHabit(null)}
+          className={
+            theme === 'dark'
+              ? 'bg-gray-800 border border-gray-700 rounded-2xl p-4 w-full max-w-md mx-auto'
+              : 'bg-white border border-gray-200 rounded-2xl p-4 w-full max-w-md mx-auto'
+          }
+        >
+          {editingHabit && (
+            <HabitEditForm
+              habit={editingHabit}
+              onSave={(data) => {
+                editHabit(editingHabit.id, data);
+                setEditingHabit(null);
+                
+              }}
+              onCancel={() => {
+                setEditingHabit(null);
+                
+              }}
+            />
+          )}
+        </Modal>
 
         {/* main layout */}
         <div className="grid md:grid-cols-3 gap-4">
@@ -2260,17 +3164,23 @@ const TaskTracker = () => {
                   </div>
                 </div>
 
-                {showAddHabit && (
-                  <div className="mb-4">
-                    <HabitForm
-                      onSave={(habit) => {
-                        setHabits((prev) => [...prev, habit]);
-                        setShowAddHabit(false);
-                      }}
-                      onCancel={() => setShowAddHabit(false)}
-                    />
-                  </div>
-                )}
+                <Modal
+                  isOpen={showAddHabit}
+                  onClose={() => setShowAddHabit(false)}
+                  className={
+                    theme === 'dark'
+                      ? 'bg-gray-800 border border-gray-700 rounded-2xl p-4 w-full max-w-md mx-auto'
+                      : 'bg-white border border-gray-200 rounded-2xl p-4 w-full max-w-md mx-auto'
+                  }
+                >
+                  <HabitForm
+                    onSave={(habit) => {
+                      setHabits((prev) => [...prev, habit]);
+                      setShowAddHabit(false);
+                    }}
+                    onCancel={() => setShowAddHabit(false)}
+                  />
+                </Modal>
 
                 <HabitDashboard />
               </div>
@@ -2283,9 +3193,35 @@ const TaskTracker = () => {
             <WidgetDashboard />
           </div>
         </div>
+
+        {/* Floating Action Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="relative">
+            <button
+              onClick={() => {
+                if (viewMode === 'habits') {
+                  setShowAddHabit(true);
+                } else {
+                  setShowAddTask(true);
+                }
+              }}
+              className="w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+              title={viewMode === 'habits' ? 'Add Habit' : 'Add Task'}
+            >
+              <Plus size={24} />
+            </button>
+            {/* Quick switch indicator */}
+            <div className="absolute -top-2 -left-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              {viewMode === 'habits' ? 'Habit' : 'Task'}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default TaskTracker;
+
+
+
