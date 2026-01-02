@@ -176,10 +176,16 @@ const TaskTracker = () => {
   }, [clockStyle]);  
 
   useEffect(() => {
-    if (!window.visualViewport) return;
+   if (!window.visualViewport) return;
 
     const initialHeight = window.visualViewport.height;
+
     const handleViewportChange = () => {
+      // Skip viewport adjustments when modals are open to prevent focus loss
+      if (showAddTask || showAddHabit || editingTask || editingHabit) {
+        return;
+      }
+
       const viewport = window.visualViewport;
       const heightDiff = initialHeight - viewport.height;
 
@@ -196,8 +202,8 @@ const TaskTracker = () => {
     return () => {
       window.visualViewport.removeEventListener('resize', handleViewportChange);
     };
-  }, []);
-
+  }, [showAddTask, showAddHabit, editingTask, editingHabit]);
+  
 
   // Status bar configuration
   useEffect(() => {
@@ -703,52 +709,37 @@ const TaskTracker = () => {
   // ------------ subcomponents ------------
 
   const Modal = ({ isOpen, onClose, children, className = '' }) => {
-    const [keyboardVisible, setKeyboardVisible] = useState(false);
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
     useEffect(() => {
-      if (!isOpen) return;
+      if (!isOpen || !window.visualViewport) return;
+
+      const initialHeight = window.visualViewport.height;
 
       const handleViewportChange = () => {
-        if (window.visualViewport) {
-          const viewport = window.visualViewport;
-          const currentHeight = viewport.height;
-          const windowHeight = window.innerHeight;
-          const heightDiff = windowHeight - currentHeight;
-          
-          // Detect keyboard (significant height reduction)
-          const isKeyboardShown = heightDiff > 150;
-          setKeyboardVisible(isKeyboardShown);
-        }
+        const viewport = window.visualViewport;
+        const heightDiff = initialHeight - viewport.height;
+        const keyboardVisible = heightDiff > 150; // Keyboard threshold
+        setIsKeyboardVisible(keyboardVisible);
       };
 
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', handleViewportChange);
-      }
+      window.visualViewport.addEventListener('resize', handleViewportChange);
 
       return () => {
-        if (window.visualViewport) {
-          window.visualViewport.removeEventListener('resize', handleViewportChange);
-        }
+        window.visualViewport.removeEventListener('resize', handleViewportChange);
       };
     }, [isOpen]);
 
     if (!isOpen) return null;
-
-    // Prevent modal from closing when keyboard is visible
-    const handleBackdropClick = (e) => {
-      if (!keyboardVisible) {
-        onClose();
-      }
-    };
 
     return (
       <>
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={handleBackdropClick}
+          onClick={isKeyboardVisible ? undefined : onClose}
         />
-        
+
         {/* Modal */}
         <div
           className={`fixed z-50 ${className}`}
@@ -1295,11 +1286,6 @@ const TaskTracker = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setModalPosition({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2,
-                      });
                       setEditingTask(t);
                     }}
                     className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
@@ -1652,11 +1638,6 @@ const TaskTracker = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setModalPosition({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2,
-                      });
                       setEditingTask(t);
                     }}
                     className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
@@ -1815,7 +1796,7 @@ const TaskTracker = () => {
     );
   };
 
-  const TaskEditForm = ({ task, onSave, onCancel }) => {
+  const TaskEditForm = ({ task, theme, onSave, onCancel }) => {
     const [name, setName] = useState(task.name);
     const [description, setDescription] = useState(task.description || '');
     const [startTime, setStartTime] = useState(task.startTime);
@@ -1885,10 +1866,20 @@ const TaskTracker = () => {
             </label>
             <input
               type="text"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter task name"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              inputMode="text"
+              enterKeyHint="done"
             />
           </div>
 
@@ -1903,7 +1894,11 @@ const TaskTracker = () => {
               </label>
               <input
                 type="time"
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
               />
@@ -1918,7 +1913,11 @@ const TaskTracker = () => {
               </label>
               <input
                 type="time"
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
               />
@@ -1934,7 +1933,11 @@ const TaskTracker = () => {
               Description
             </label>
             <textarea
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -1952,7 +1955,11 @@ const TaskTracker = () => {
                 Priority
               </label>
               <select
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
@@ -1970,7 +1977,11 @@ const TaskTracker = () => {
                 Category
               </label>
               <select
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -2015,7 +2026,11 @@ const TaskTracker = () => {
                 Icon
               </label>
               <select
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
               >
@@ -2038,7 +2053,11 @@ const TaskTracker = () => {
               Notes
             </label>
             <textarea
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -2056,7 +2075,11 @@ const TaskTracker = () => {
             </label>
             <input
               type="time"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               value={reminder || ''}
               onChange={(e) => setReminder(e.target.value)}
             />
@@ -2082,7 +2105,7 @@ const TaskTracker = () => {
     );
   };
 
-  const HabitEditForm = ({ habit, onSave, onCancel }) => {
+  const HabitEditForm = ({ habit, theme, onSave, onCancel }) => {
     const [name, setName] = useState(habit.name);
     const [frequencyType, setFrequencyType] = useState(habit.frequencyType);
     const [targetCount, setTargetCount] = useState(habit.targetCount);
@@ -2139,10 +2162,20 @@ const TaskTracker = () => {
             </label>
             <input
               type="text"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter habit name"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              inputMode="text"
+              enterKeyHint="done"
             />
           </div>
 
@@ -2156,7 +2189,11 @@ const TaskTracker = () => {
                 Frequency
               </label>
               <select
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={frequencyType}
                 onChange={(e) => setFrequencyType(e.target.value)}
               >
@@ -2176,7 +2213,11 @@ const TaskTracker = () => {
               <input
                 type="number"
                 min={1}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={targetCount}
                 onChange={(e) => setTargetCount(e.target.value)}
               />
@@ -2215,7 +2256,11 @@ const TaskTracker = () => {
                 Icon
               </label>
               <select
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
               >
@@ -2238,7 +2283,11 @@ const TaskTracker = () => {
             </label>
             <input
               type="time"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                theme === 'dark'
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
               value={reminderTime || ''}
               onChange={(e) => setReminderTime(e.target.value)}
             />
@@ -2317,6 +2366,12 @@ const TaskTracker = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Drink water, Read, Workout..."
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              inputMode="text"
+              enterKeyHint="done"
             />
           </div>
 
@@ -2530,12 +2585,7 @@ const TaskTracker = () => {
                       {(habit.completions || {})[todayStr] > 0 ? '✓ Done' : 'Complete'}
                     </button>
                     <button
-                      onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setModalPosition({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top + rect.height / 2,
-                        });
+                      onClick={() => {
                         setEditingHabit(habit);
                       }}
                       className={`p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
@@ -3010,6 +3060,7 @@ const TaskTracker = () => {
               : 'bg-white border border-gray-200 rounded-2xl p-4 w-80 max-w-[90vw]'
           }
         >
+          <div key="new-task-form" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-3">
             <h3
               className={
@@ -3035,26 +3086,41 @@ const TaskTracker = () => {
           <form onSubmit={submitNewTask} className="space-y-3">
             <input
               type="text"
-              placeholder="Task name"
-              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
               value={newTaskName}
               onChange={(e) => setNewTaskName(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              placeholder="Task name"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              inputMode="text"
+              enterKeyHint="done"
             />
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs mb-1">Start</label>
+                <label className={`block text-xs mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Start</label>
                 <input
                   type="time"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+                  className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   value={newTaskStart}
                   onChange={(e) => setNewTaskStart(e.target.value)}
                 />
               </div>
               <div>
-                <label className="block text-xs mb-1">End</label>
+                <label className={`block text-xs mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>End</label>
                 <input
                   type="time"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+                  className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 border-gray-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  }`}
                   value={newTaskEnd}
                   onChange={(e) => setNewTaskEnd(e.target.value)}
                 />
@@ -3081,6 +3147,7 @@ const TaskTracker = () => {
               </button>
             </div>
           </form>
+          </div>
         </Modal>
 
         {/* edit task form */}
@@ -3095,15 +3162,17 @@ const TaskTracker = () => {
         >
           {editingTask && (
             <TaskEditForm
+              key={`task-edit-${editingTask.id}`}
               task={editingTask}
+              theme={theme}
               onSave={(data) => {
                 editTask(editingTask.id, data);
                 setEditingTask(null);
-                
+
               }}
               onCancel={() => {
                 setEditingTask(null);
-                
+
               }}
             />
           )}
@@ -3121,15 +3190,17 @@ const TaskTracker = () => {
         >
           {editingHabit && (
             <HabitEditForm
+              key={`habit-edit-${editingHabit.id}`}
               habit={editingHabit}
+              theme={theme}
               onSave={(data) => {
                 editHabit(editingHabit.id, data);
                 setEditingHabit(null);
-                
+
               }}
               onCancel={() => {
                 setEditingHabit(null);
-                
+
               }}
             />
           )}
@@ -3222,6 +3293,3 @@ const TaskTracker = () => {
 };
 
 export default TaskTracker;
-
-
-
