@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">HabitForge</string>
-    <string name="title_activity_main">HabitForge</string>
-    <string name="package_name">com.workadayvoid.habitforge</string>
-    <string name="custom_url_scheme">com.workadayvoid.habitforge</string>
+    <string name="app_name">QuantumHabits</string>
+    <string name="title_activity_main">QuantumHabits</string>
+    <string name="package_name">com.workadayvoid.quantumhabits</string>
+    <string name="custom_url_scheme">com.workadayvoid.quantumhabits</string>
 </resources>
