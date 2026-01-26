@@ -41,7 +41,7 @@ const HabitDashboard = () => {
     return Math.round((done / 30) * 100); // Rate over last 30 days
   };
 
-  const filteredHabits = habits.filter(h => 
+  const filteredHabits = habits.filter(h =>
     activeTab === 'all' ? true : h.category?.toLowerCase() === activeTab
   );
 
@@ -71,11 +71,10 @@ const HabitDashboard = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${
-              activeTab === tab 
-                ? 'bg-blue-600 text-white' 
-                : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
-            }`}
+            className={`px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === tab
+              ? 'bg-blue-600 text-white'
+              : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
+              }`}
           >
             {tab}
           </button>
@@ -92,13 +91,12 @@ const HabitDashboard = () => {
             <div
               key={habit.id}
               onClick={() => setSelectedHabitForCalendar(habit)}
-              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer ${
-                theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-              } border border-gray-200/10 shadow-sm`}
+              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                } border border-gray-200/10 shadow-sm`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <div 
+                  <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg"
                     style={{ backgroundColor: habit.color || '#3b82f6' }}
                   >
@@ -115,13 +113,12 @@ const HabitDashboard = () => {
 
                 <button
                   onClick={() => toggleHabitCompletion(habit.id, todayStr)}
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                    isDoneToday 
-                      ? 'bg-green-500 text-white shadow-lg shadow-green-500/30 scale-95' 
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
-                  }`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${isDoneToday
+                    ? 'bg-green-100 text-green-600 scale-95'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+                    }`}
                 >
-                  <CheckCircle size={28} weight={isDoneToday ? "fill" : "regular"} />
+                  <CheckCircle size={28} />
                 </button>
               </div>
 
@@ -139,11 +136,10 @@ const HabitDashboard = () => {
                           e.stopPropagation();
                           toggleHabitCompletion(habit.id, d);
                         }}
-                        className={`w-8 h-8 rounded-lg transition-all ${
-                          active
-                            ? 'bg-blue-500 shadow-md scale-105'
-                            : 'bg-gray-200 dark:bg-gray-700'
-                        }`}
+                        className={`w-8 h-8 rounded-lg transition-all ${active
+                          ? 'bg-blue-500 shadow-md scale-105'
+                          : 'bg-gray-200 dark:bg-gray-700'
+                          }`}
                       />
                       <span className="text-[10px] font-bold opacity-40">
                         {d.toLocaleDateString('en-US', { weekday: 'narrow' })}
@@ -158,12 +154,14 @@ const HabitDashboard = () => {
       </div>
 
       {/* Empty State */}
-      {filteredHabits.length === 0 && (
-        <div className="text-center py-12 opacity-40">
-          <p className="font-bold">No habits found in this category.</p>
-        </div>
-      )}
-    </div>
+      {
+        filteredHabits.length === 0 && (
+          <div className="text-center py-12 opacity-40">
+            <p className="font-bold">No habits found in this category.</p>
+          </div>
+        )
+      }
+    </div >
   );
 };
 
