@@ -623,17 +623,15 @@ const HabitTracker = () => {
                                 e.stopPropagation();
                                 setEditingNote({ habitId: habit.id, dateStr: today });
                                 setNoteText(habit.notes?.[today] || '');
-                                if (navigator.vibrate) navigator.vibrate(8);
+                                if (navigator.vibrate) navigator.vibrate(5);
                               }}
-                              className={`flex items-center gap-2 transition-all active:scale-95 px-3 py-1.5 rounded-full border shadow-sm ${habit.notes?.[today]
-                                ? theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'
-                                : theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-500' : 'bg-gray-50 border-gray-100 text-gray-400'
+                              className={`flex items-center gap-1.5 transition-all active:scale-90 px-1.5 py-0.5 rounded-lg ${habit.notes?.[today]
+                                ? theme === 'dark' ? 'text-blue-400 bg-blue-400/10' : 'text-blue-600 bg-blue-50'
+                                : 'text-gray-400 hover:text-gray-500'
                                 }`}
                             >
-                              <FileText className="w-5 h-5" />
-                              <span className="text-[11px] font-black uppercase tracking-wider">
-                                {habit.notes?.[today] ? 'Read Note' : 'Add Note'}
-                              </span>
+                              <FileText className="w-3.5 h-3.5" />
+                              {habit.notes?.[today] && <span className="text-[10px] font-black uppercase tracking-wider">Note</span>}
                             </button>
                             {reminderCount > 0 && (
                               <div className="flex items-center gap-1">
@@ -708,14 +706,14 @@ const HabitTracker = () => {
                             e.stopPropagation();
                             setEditingNote({ habitId: habit.id, dateStr: today });
                             setNoteText(habit.notes?.[today] || '');
-                            if (navigator.vibrate) navigator.vibrate(8);
+                            if (navigator.vibrate) navigator.vibrate(5);
                           }}
-                          className={`flex items-center transition-all active:scale-95 px-2 py-1 rounded-full border shadow-sm ${habit.notes?.[today]
-                            ? theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'
-                            : theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-400' : 'bg-gray-100 border-gray-200 text-gray-400'
+                          className={`flex items-center transition-all active:scale-90 px-1.5 py-0.5 rounded-lg ${habit.notes?.[today]
+                            ? theme === 'dark' ? 'text-blue-400 bg-blue-400/10' : 'text-blue-600 bg-blue-50'
+                            : 'text-gray-400 hover:text-gray-500'
                             }`}
                         >
-                          <FileText className="w-5 h-5" />
+                          <FileText className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
@@ -1456,17 +1454,14 @@ const HabitTracker = () => {
                     onClick={() => {
                       setEditingNote({ habitId: habit.id, dateStr: today });
                       setNoteText(habit.notes?.[today] || '');
-                      if (navigator.vibrate) navigator.vibrate(10);
+                      if (navigator.vibrate) navigator.vibrate(5);
                     }}
-                    className={`flex items-center gap-2 transition-all active:scale-95 px-4 py-2 rounded-full border shadow-sm ${habit.notes?.[today]
-                        ? theme === 'dark' ? 'bg-blue-900/30 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-100 text-blue-600'
-                        : theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-400' : 'bg-gray-50 border-gray-100 text-gray-400'
+                    className={`p-2 rounded-full transition-all active:scale-90 ${habit.notes?.[today]
+                      ? theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-50 text-blue-600'
+                      : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-50 text-gray-400'
                       }`}
                   >
                     <MessageSquare className="w-5 h-5" />
-                    <span className="text-[11px] font-black uppercase tracking-wider">
-                      {habit.notes?.[today] ? 'Note' : 'Add Note'}
-                    </span>
                   </button>
                   <button
                     onClick={() => {
