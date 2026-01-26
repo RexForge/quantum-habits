@@ -513,11 +513,12 @@ input:checked+.native-slider:before {
   left: 0 !important;
   right: 0 !important;
   background: white !important;
-  border-radius: 24px 24px 0 0 !important;
+  border-radius: 20px 20px 0 0 !important;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12) !important;
   max-height: 90vh !important;
   overflow-y: auto !important;
-  padding-bottom: env(safe-area-inset-bottom) !important;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+  margin-bottom: 0 !important;
   z-index: 1000 !important;
 }
 
