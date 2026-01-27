@@ -1,4 +1,4 @@
-# HabitForge - Mobile Habit Tracker
+# Quantum Habit - Mobile Habit Tracker
 
 A beautiful, mobile-first habit tracking app built with React, Vite, Tailwind CSS, and Capacitor for cross-platform mobile deployment.
 
