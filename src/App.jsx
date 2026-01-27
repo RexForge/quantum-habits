@@ -7,17 +7,7 @@ import { LocalNotifications } from '@capacitor/local-notifications';
 const HabitTracker = () => {
   const [habits, setHabits] = useState(() => {
     const saved = localStorage.getItem('habits');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: 1,
-        name: 'Drink Water',
-        icon: '💧',
-        color: '#3b82f6',
-        completions: {},
-        reminders: [],
-        createdAt: new Date().toISOString()
-      }
-    ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
@@ -40,29 +30,38 @@ const HabitTracker = () => {
   const [editingNote, setEditingNote] = useState(null); // { habitId, dateStr }
   const [noteText, setNoteText] = useState('');
 
-  // Icon and color options
+  // Standard Compatibility Emoji Library
   const iconOptions = [
-    '🎯', '💧', '🏃', '📚', '💼', '☕', '🎨', '🎵', '🏋️', '🧘',
-    '📝', '🎬', '📖', '✏️', '🎹', '🎸', '🎤', '🖥️', '📱', '💻',
-    '🛏️', '🛀', '🚿', '🍎', '🥗', '🥤', '🍵', '🧹', '🧽', '🧺',
-    '🛒', '🚗', '🚌', '🚲', '🏠', '🏢', '🏥', '🏫', '💼', '💰',
-    '📊', '📈', '📉', '📋', '📅', '⏰', '⏱️', '🕐', '💪', '🧠',
-    '❤️', '🫀', '🫁', '🌱', '🌿', '🌳', '🌺', '🌞', '🌙', '⭐',
-    '🌟', '✨', '🔥', '💎', '🎁', '🎉', '🎊', '🎈', '⚽', '🏀',
-    '🏈', '⚾', '🎾', '🏐', '🏓', '🏸', '🏒', '🏑', '🏉', '🎱',
-    '🎯', '🎳', '🎲', '🎮', '🕹️', '🎵', '🎶', '🎼', '🎤', '🎧',
-    '📻', '🎷', '🎺', '🪕', '🥁', '🎻', '🎸', '🎹', '🖼️', '🎨',
-    '🖌️', '🖍️', '📐', '📏', '🔧', '🔨', '🛠️', '⚙️', '🔩', '⚖️',
-    '🧲', '🧪', '🔬', '🌍', '🌎', '🌏', '🗺️', '🗻', '🏔️', '🏕️',
-    '🏖️', '🏜️', '🏝️', '🏞️', '🏛️', '🏰', '🏯', '🏟️'
+    '🎯', '💧', '🏃', '🚴', '🏊', '🏋️', '🧘', '🚶', '💪', '🧠', '❤️', '💊', '🛀', '🛌', '🥗', '🍎',
+    '📚', '📝', '✏️', '📖', '💻', '🖥️', '📱', '📅', '⏰', '⏱️', '📋', '📈', '📊', '💼', '💡', '🔬',
+    '🎨', '🎥', '🎬', '📸', '🎵', '🎶', '🎷', '🎸', '🎹', '🎮', '🕹️', '🖌️', '🧶', '🧵', '📻', '📺',
+    '☕', '🍵', '🥤', '🍼', '🍌', '🍇', '🍓', '🥑', '🥩', '🍚', '🥖', '🥨', '🍕', '🍳', '🍨', '🍩',
+    '🌱', '🌿', '🌲', '🌳', '🌴', '🌺', '🌸', '🌞', '🌙', '⭐', '☁️', '⚡', '🔥', '🌈', '🌊', '🏡',
+    '✈️', '⛵', '🚀', '🚗', '🚲', '🛴', '🗺️', '⛰️', '🏖️', '🏜️', '🏕️', '⛺', '🚌', '🚆', '🚢', '🎡',
+    '✨', '🌟', '🎨', '🎁', '🎉', '🎈', '💰', '💳', '🔑', '🏷️', '🔔', '💬', '🧹', '🧺', '🛌', '🛒',
+    '😊', '🥳', '😎', '😴', '🙌', '👏', '🤝', '👍', '👎', '🤞', '👌', '✌️', '🪥', '🙏', '💯', '🔥'
   ];
 
+  // Expanded Unique Color Palette (50+ shades)
   const colorOptions = [
-    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4',
-    '#84cc16', '#f97316', '#ec4899', '#6366f1', '#14b8a6', '#f43f5e',
-    '#eab308', '#22c55e', '#a855f7', '#fb7185', '#fbbf24', '#34d399',
-    '#60a5fa', '#a78bfa', '#f87171', '#4ade80', '#fbbf24', '#f472b6',
-    '#c084fc', '#38bdf8', '#fb923c'
+    // Blues
+    '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#60a5fa',
+    // Cyans & Teals
+    '#06b6d4', '#0891b2', '#0e7490', '#14b8a6', '#0d9488', '#0f766e',
+    // Greens
+    '#10b981', '#059669', '#047857', '#22c55e', '#16a34a', '#15803d', '#84cc16', '#65a30d', '#4d7c0f',
+    // Yellows & Ambers
+    '#f59e0b', '#d97706', '#b45309', '#eab308', '#ca8a04', '#a16207',
+    // Oranges & Reds
+    '#f97316', '#ea580c', '#c2410c', '#ef4444', '#dc2626', '#b91c1c', '#991b1b',
+    // Roses & Pinks
+    '#f43f5e', '#e11d48', '#be185d', '#ec4899', '#db2777', '#9d174d',
+    // Purples & Fuchsias
+    '#d946ef', '#c026d3', '#a21caf', '#a855f7', '#9333ea', '#7e22ce',
+    // Indigos & Violets
+    '#6366f1', '#4f46e5', '#4338ca', '#8b5cf6', '#7c3aed', '#6d28d9',
+    // Slates & Neutrals
+    '#475569', '#334155', '#1e293b'
   ];
 
   // Persistence
@@ -1229,20 +1228,24 @@ const HabitTracker = () => {
       {/* Icon Picker Modal */}
       {
         showIconPicker && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4 modal-backdrop-safe" onClick={() => setShowIconPicker(false)}>
-            <div className={`${cardClasses} w-full max-w-lg rounded-3xl p-6 border max-h-[80vh] overflow-hidden modal-safe-area`} onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-[70] modal-backdrop-safe" onClick={() => setShowIconPicker(false)}>
+            <div
+              className={`${cardClasses} w-full mobile-bottom-sheet max-h-[85vh] flex flex-col`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mobile-sheet-handle" />
               <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Choose Icon</h3>
                 <button
                   onClick={() => setShowIconPicker(false)}
-                  className={`mobile-touch-target rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`p-2 rounded-full transition-all active:scale-90 ${theme === 'dark' ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="max-h-96 overflow-y-auto">
-                <div className="grid grid-cols-6 gap-3">
+              <div className="flex-1 overflow-y-auto px-1 pb-10">
+                <div className="grid grid-cols-5 gap-4">
                   {iconOptions.map(icon => (
                     <button
                       key={icon}
@@ -1250,9 +1253,9 @@ const HabitTracker = () => {
                         setHabitForm({ ...habitForm, icon });
                         setShowIconPicker(false);
                       }}
-                      className={`mobile-touch-target aspect-square rounded-xl border-2 flex items-center justify-center text-2xl transition-all active:scale-95 ${habitForm.icon === icon
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+                      className={`aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl transition-all active:scale-90 shadow-sm ${habitForm.icon === icon
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
+                        : theme === 'dark' ? 'border-gray-700 bg-gray-800/50' : 'border-gray-100 bg-gray-50'
                         }`}
                     >
                       {icon}
