@@ -1,4 +1,4 @@
-package com.workadayvoid.quantumhabits;
+package com.rexforge.quantumhabits;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

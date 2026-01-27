@@ -1,4 +1,4 @@
-package com.workadayvoid.quantumhabits;
+package com.rexforge.quantumhabits;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -37,7 +37,7 @@ public class HabitReminderService extends Service {
         int reminderIndex;
 
         ScheduledReminder(String id, String habitName, String message, String habitColor,
-                         long timestamp, int habitId, int reminderIndex) {
+                long timestamp, int habitId, int reminderIndex) {
             this.id = id;
             this.habitName = habitName;
             this.message = message;
@@ -85,8 +85,8 @@ public class HabitReminderService extends Service {
 
         // Make this service run in foreground to prevent it from being killed
         if (Build.VERSION.SDK_INT >= 34) { // Android 14+
-            startForeground(NOTIFICATION_ID_BASE - 1, createForegroundNotification(), 
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+            startForeground(NOTIFICATION_ID_BASE - 1, createForegroundNotification(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else {
             startForeground(NOTIFICATION_ID_BASE - 1, createForegroundNotification());
         }
@@ -111,10 +111,9 @@ public class HabitReminderService extends Service {
                     iterator.remove();
                 }
             }
-            
+
             ScheduledReminder reminder = new ScheduledReminder(
-                id, habitName, message, habitColor, timestamp, habitId, reminderIndex
-            );
+                    id, habitName, message, habitColor, timestamp, habitId, reminderIndex);
             scheduledReminders.add(reminder);
             saveScheduledReminders();
         }
@@ -131,7 +130,7 @@ public class HabitReminderService extends Service {
                     changed = true;
                 }
             }
-            
+
             if (changed) {
                 saveScheduledReminders();
             }
@@ -172,15 +171,15 @@ public class HabitReminderService extends Service {
     private android.app.Notification createForegroundNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
-            this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+                this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("QuantumHabits Active")
-            .setContentText("Habit reminders are running in background")
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build();
+                .setContentTitle("QuantumHabits Active")
+                .setContentText("Habit reminders are running in background")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build();
     }
 
     private void loadScheduledReminders() {
@@ -194,14 +193,13 @@ public class HabitReminderService extends Service {
             for (int i = 0; i < remindersArray.length(); i++) {
                 JSONObject reminderObj = remindersArray.getJSONObject(i);
                 ScheduledReminder reminder = new ScheduledReminder(
-                    reminderObj.getString("id"),
-                    reminderObj.getString("habitName"),
-                    reminderObj.getString("message"),
-                    reminderObj.getString("habitColor"),
-                    reminderObj.getLong("timestamp"),
-                    reminderObj.getInt("habitId"),
-                    reminderObj.getInt("reminderIndex")
-                );
+                        reminderObj.getString("id"),
+                        reminderObj.getString("habitName"),
+                        reminderObj.getString("message"),
+                        reminderObj.getString("habitColor"),
+                        reminderObj.getLong("timestamp"),
+                        reminderObj.getInt("habitId"),
+                        reminderObj.getInt("reminderIndex"));
                 scheduledReminders.add(reminder);
             }
         } catch (JSONException e) {
@@ -240,8 +238,9 @@ public class HabitReminderService extends Service {
         while (iterator.hasNext()) {
             ScheduledReminder reminder = iterator.next();
             if (currentTime >= reminder.timestamp) {
-                // If it's within the last 5 minutes, show it. If older, just discard it (missed)
-                if (currentTime < reminder.timestamp + 5 * 60000) { 
+                // If it's within the last 5 minutes, show it. If older, just discard it
+                // (missed)
+                if (currentTime < reminder.timestamp + 5 * 60000) {
                     showReminderNotification(reminder);
                 }
                 iterator.remove(); // Remove after showing or if stale
@@ -261,7 +260,7 @@ public class HabitReminderService extends Service {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
-            this, reminder.habitId, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                this, reminder.habitId, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // Complete action
         Intent completeIntent = new Intent(this, NotificationActionReceiver.class);
@@ -269,7 +268,8 @@ public class HabitReminderService extends Service {
         completeIntent.putExtra("habitId", reminder.habitId);
         completeIntent.putExtra("reminderId", reminder.id);
         PendingIntent completePendingIntent = PendingIntent.getBroadcast(
-            this, reminder.habitId * 100, completeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                this, reminder.habitId * 100, completeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // Snooze action
         Intent snoozeIntent = new Intent(this, NotificationActionReceiver.class);
@@ -277,25 +277,27 @@ public class HabitReminderService extends Service {
         snoozeIntent.putExtra("habitId", reminder.habitId);
         snoozeIntent.putExtra("reminderId", reminder.id);
         PendingIntent snoozePendingIntent = PendingIntent.getBroadcast(
-            this, reminder.habitId * 100 + 1, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                this, reminder.habitId * 100 + 1, snoozeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("🔔 " + reminder.habitName)
-            .setContentText(reminder.message)
-            .setStyle(new NotificationCompat.BigTextStyle()
-                .bigText(reminder.message))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .setVibrate(new long[]{0, 250, 250, 250})
-            .setLights(0xFF0000FF, 1000, 1000)
-            .addAction(android.R.drawable.ic_menu_save, "Mark Complete", completePendingIntent)
-            .addAction(android.R.drawable.ic_menu_recent_history, "Remind Later", snoozePendingIntent);
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("🔔 " + reminder.habitName)
+                .setContentText(reminder.message)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(reminder.message))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setVibrate(new long[] { 0, 250, 250, 250 })
+                .setLights(0xFF0000FF, 1000, 1000)
+                .addAction(android.R.drawable.ic_menu_save, "Mark Complete", completePendingIntent)
+                .addAction(android.R.drawable.ic_menu_recent_history, "Remind Later", snoozePendingIntent);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (checkSelfPermission(
+                    android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 notificationManager.notify(NOTIFICATION_ID_BASE + reminder.habitId, builder.build());
             }
         } else {
@@ -304,8 +306,8 @@ public class HabitReminderService extends Service {
     }
 
     public static void scheduleReminder(android.content.Context context, String id, String habitName,
-                                      String message, String habitColor, long timestamp,
-                                      int habitId, int reminderIndex) {
+            String message, String habitColor, long timestamp,
+            int habitId, int reminderIndex) {
         Intent serviceIntent = new Intent(context, HabitReminderService.class);
         serviceIntent.setAction("SCHEDULE_REMINDER");
         serviceIntent.putExtra("id", id);
@@ -327,7 +329,7 @@ public class HabitReminderService extends Service {
         Intent serviceIntent = new Intent(context, HabitReminderService.class);
         serviceIntent.setAction("CANCEL_REMINDERS");
         serviceIntent.putExtra("habitId", habitId);
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent);
         } else {

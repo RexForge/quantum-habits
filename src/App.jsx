@@ -468,7 +468,7 @@ const HabitTracker = () => {
   const cardClasses = theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
 
   return (
-    <div className={`${themeClasses} min-h-screen safe-area-padding modal-safe-area`}>
+    <div className={`${themeClasses} min-h-screen safe-area-padding`}>
       {/* Header */}
       {/* Header */}
       <div className={`px-6 py-4 border-b transition-colors duration-300 ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
@@ -912,7 +912,7 @@ const HabitTracker = () => {
       {/* Floating Action Button */}
       <button
         onClick={() => setShowAddHabit(true)}
-        className="fixed bottom-6 right-6 mobile-fab bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+        className="fixed bottom-6 right-6 mobile-fab bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-colors flex items-center justify-center fab-safe-area"
       >
         <Plus className="w-6 h-6" />
       </button>
@@ -1050,6 +1050,11 @@ const HabitTracker = () => {
                     onChange={(e) => setReminderForm({ ...reminderForm, message: e.target.value })}
                     placeholder="Reminder message (optional)"
                     className="mobile-input w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && reminderForm.habitId) {
+                        addReminderToHabit(reminderForm.habitId);
+                      }
+                    }}
                   />
                   <button
                     onClick={() => {
@@ -1098,6 +1103,11 @@ const HabitTracker = () => {
                     onChange={(e) => setHabitForm({ ...habitForm, name: e.target.value })}
                     className="mobile-input w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="e.g., Drink water"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        addHabit();
+                      }
+                    }}
                   />
                 </div>
 
@@ -1170,6 +1180,11 @@ const HabitTracker = () => {
                     onChange={(e) => setHabitForm({ ...habitForm, name: e.target.value })}
                     className="mobile-input w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="e.g., Drink water"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateHabit();
+                      }
+                    }}
                   />
                 </div>
 

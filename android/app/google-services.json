@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:124929410484:android:3344b48fe1ad4b2c9edee1",
+        "mobilesdk_app_id": "1:124929410484:android:2db67cbc097dc3739edee1",
         "android_client_info": {
-          "package_name": "com.workadayvoid.quantumhabits"
+          "package_name": "com.rexforge.quantumhabits"
         }
       },
       "oauth_client": [],

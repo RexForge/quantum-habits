@@ -2,37 +2,29 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
-
 android {
-    namespace = "com.workadayvoid.quantumhabits"
-
-    compileSdk = 36
-
-
+    namespace = "com.rexforge.quantumhabits"
+    compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId = "com.workadayvoid.quantumhabits"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        applicationId "com.rexforge.quantumhabits"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
-
     buildTypes {
         release {
-            minifyEnabled = false
-            proguardFiles( 
-                getDefaultProguardFile('proguard-android-optimize.txt'),
-                'proguard-rules.pro'
-            )
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
-
 
 repositories {
     flatDir{
@@ -42,26 +34,13 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    implementation project(':capacitor-cordova-android-plugins')
-    implementation platform('com.google.firebase:firebase-bom:33.4.0')
-    implementation 'com.google.firebase:firebase-crashlytics'
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
 }
 
 apply from: 'capacitor.build.gradle'
-
-// The crash "The Crashlytics build ID is missing" occurs because the plugin is applied
-// but cannot find its configuration or is missing its build-time processing.
-// We only apply it if the google-services.json is present and correctly configured.
-
-if (file('google-services.json').exists()) {
-    // Enable Firebase services
-    apply plugin: 'com.google.gms.google-services'
-    // Only apply Crashlytics if you have actually set it up in Firebase Console
-    // and want to use it. If not, comment out the line below.
-    // apply plugin: 'com.google.firebase.crashlytics'
-}

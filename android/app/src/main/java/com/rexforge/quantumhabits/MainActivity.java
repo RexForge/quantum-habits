@@ -1,4 +1,10 @@
-package com.workadayvoid.quantumhabits;
+
+package com.rexforge.quantumhabits;
+
+import android.graphics.Color;
+import android.view.Window;
+import android.view.WindowManager;
+
 
 import android.content.Intent;
 import android.os.Build;
@@ -12,6 +18,15 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(HabitReminderPlugin.class);
         super.onCreate(savedInstanceState);
 
+        // 🔥 EDGE TO EDGE UI (Premium look)
+        Window window = getWindow();
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
+    
         // Start the background reminder service
         startReminderService();
 

@@ -54,7 +54,7 @@ body {
 /* Safe area padding for mobile devices - comprehensive approach */
 .safe-area-padding {
   padding-top: max(env(safe-area-inset-top), 36px) !important;
-  padding-bottom: calc(max(env(safe-area-inset-bottom), 24px) + 6rem) !important;
+  padding-bottom: calc(max(env(safe-area-inset-bottom), 48px) + 6rem) !important;
   /* Extra padding for navigation buttons */
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
@@ -66,7 +66,7 @@ body {
 /* Ensure modals and overlays respect safe areas */
 .modal-safe-area {
   padding-top: max(env(safe-area-inset-top), 24px) !important;
-  padding-bottom: max(env(safe-area-inset-bottom), 24px) !important;
+  padding-bottom: max(env(safe-area-inset-bottom), 48px) !important;
   padding-left: env(safe-area-inset-left) !important;
   padding-right: env(safe-area-inset-right) !important;
 }
@@ -81,7 +81,7 @@ body {
 
 /* Bottom sheet modals that slide up from safe area */
 .bottom-modal-safe {
-  bottom: calc(max(env(safe-area-inset-bottom), 24px) + 3rem) !important;
+  bottom: calc(max(env(safe-area-inset-bottom), 48px) + 3rem) !important;
   /* Leave room for navigation buttons */
   left: env(safe-area-inset-left) !important;
   right: env(safe-area-inset-right) !important;
@@ -89,7 +89,7 @@ body {
 
 /* FAB positioning with safe area */
 .fab-safe-area {
-  bottom: calc(6rem + max(env(safe-area-inset-bottom), 24px));
+  bottom: calc(6rem + max(env(safe-area-inset-bottom), 48px));
 }
 
 /* Ensure bottom navigation respects safe areas */
