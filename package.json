@@ -25,9 +25,9 @@
     "@capacitor/status-bar": "^8.0.0",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
-    "react": "^19.2.0",
+    "react": "^19.2.3",
     "react-confetti": "^6.4.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
