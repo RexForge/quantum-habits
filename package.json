@@ -25,9 +25,9 @@
     "@capacitor/status-bar": "^8.0.0",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "react-confetti": "^6.4.0",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
@@ -43,5 +43,8 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "vite": "npm:rolldown-vite@^7.2.5"
+  },
+  "overrides": {
+    "tar": "^7.5.6"
   }
 }

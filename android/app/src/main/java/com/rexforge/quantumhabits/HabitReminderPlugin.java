@@ -1,35 +1,23 @@
-package com.workadayvoid.quantumhabits;
 
+package com.rexforge.quantumhabits;
+
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.json.JSONException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import android.content.Context;
-import android.content.SharedPreferences;
-import com.getcapacitor.JSObject;
+import org.json.JSONObject;
 
 @CapacitorPlugin(name = "HabitReminder")
 public class HabitReminderPlugin extends Plugin {
 
     @PluginMethod
     public void scheduleHabitReminders(PluginCall call) {
-        String habitsJson = call.getString("habits");
-        if (habitsJson == null) {
-            call.reject("Must provide habits encoded as JSON string");
-            return;
-        }
-
-        // Save habits to shared preferences for the receiver to update
-        SharedPreferences prefs = getContext().getSharedPreferences("quantumhabits_data", Context.MODE_PRIVATE);
-        prefs.edit().putString("habits", habitsJson).apply();
-
         try {
+            String habitsJson = call.getString("habits", "[]");
             JSONArray habits = new JSONArray(habitsJson);
             long now = System.currentTimeMillis();
 
@@ -84,17 +72,8 @@ public class HabitReminderPlugin extends Plugin {
             }
             call.resolve();
         } catch (JSONException e) {
-            call.reject("Failed to parse habits JSON", e);
+            call.reject("Error parsing habits JSON", e);
         }
-    }
-
-    @PluginMethod
-    public void fetchHabitData(PluginCall call) {
-        SharedPreferences prefs = getContext().getSharedPreferences("quantumhabits_data", Context.MODE_PRIVATE);
-        String habitsJson = prefs.getString("habits", "[]");
-        JSObject ret = new JSObject();
-        ret.put("habits", habitsJson);
-        call.resolve(ret);
     }
 
     @PluginMethod
@@ -114,11 +93,11 @@ public class HabitReminderPlugin extends Plugin {
             int hours = Integer.parseInt(parts[0]);
             int minutes = Integer.parseInt(parts[1]);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, hours);
-            calendar.set(Calendar.MINUTE, minutes);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, hours);
+            calendar.set(java.util.Calendar.MINUTE, minutes);
+            calendar.set(java.util.Calendar.SECOND, 0);
+            calendar.set(java.util.Calendar.MILLISECOND, 0);
 
             long reminderTime = calendar.getTimeInMillis();
 
@@ -146,17 +125,17 @@ public class HabitReminderPlugin extends Plugin {
             int startTotalMinutes = startHours * 60 + startMinutes;
             int endTotalMinutes = endHours * 60 + endMinutes;
 
-            List<Long> times = new ArrayList<>();
+            java.util.List<Long> times = new java.util.ArrayList<>();
 
             for (int minutes = startTotalMinutes; minutes <= endTotalMinutes; minutes += intervalMinutes) {
                 int hours = minutes / 60;
                 int mins = minutes % 60;
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, hours);
-                calendar.set(Calendar.MINUTE, mins);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
+                java.util.Calendar calendar = java.util.Calendar.getInstance();
+                calendar.set(java.util.Calendar.HOUR_OF_DAY, hours);
+                calendar.set(java.util.Calendar.MINUTE, mins);
+                calendar.set(java.util.Calendar.SECOND, 0);
+                calendar.set(java.util.Calendar.MILLISECOND, 0);
 
                 long reminderTime = calendar.getTimeInMillis();
 
