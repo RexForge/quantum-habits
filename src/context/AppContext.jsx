@@ -20,68 +20,15 @@ export const AppProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem('sectograph_tasks');
       if (saved) return JSON.parse(saved);
-    } catch {}
-    const today = new Date().toISOString().split('T')[0];
-    return [
-      {
-        id: 1,
-        name: 'Meeting',
-        description: 'Morning briefing',
-        startTime: '11:00',
-        endTime: '12:00',
-        duration: 60,
-        color: '#10b981',
-        icon: 'M',
-        completed: false,
-        date: today,
-        recurring: null,
-        reminder: null,
-        priority: 'medium',
-        category: 'Work',
-        notes: '',
-      },
-      {
-        id: 2,
-        name: 'Lunch',
-        description: 'Going to Riviera café',
-        startTime: '12:00',
-        endTime: '13:00',
-        duration: 60,
-        color: '#ef4444',
-        icon: '🍽️',
-        completed: false,
-        date: today,
-        recurring: null,
-        reminder: null,
-        priority: 'low',
-        category: 'Personal',
-        notes: '',
-      },
-      {
-        id: 3,
-        name: 'Work',
-        description: 'Project development',
-        startTime: '13:00',
-        endTime: '14:30',
-        duration: 90,
-        color: '#8b5cf6',
-        icon: 'W',
-        completed: false,
-        date: today,
-        recurring: null,
-        reminder: null,
-        priority: 'high',
-        category: 'Work',
-        notes: '',
-      },
-    ];
+    } catch { }
+    return [];
   });
 
   const [habits, setHabits] = useState(() => {
     try {
       const saved = localStorage.getItem('habitkit_habits');
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch { }
     return [];
   });
 
@@ -211,23 +158,23 @@ export const AppProvider = ({ children }) => {
       prev.map((t) =>
         t.id === id
           ? {
-              ...t,
-              name: data.name,
-              description: data.description || '',
-              startTime: data.startTime,
-              endTime: data.endTime,
-              duration: data.duration,
-              color: data.color || t.color,
-              icon: data.icon || t.icon,
-              date: data.date || t.date,
-              recurring: data.recurring || t.recurring,
-              reminder: data.reminder || t.reminder,
-              priority: data.priority || t.priority,
-              category: data.category || t.category,
-              notes: data.notes || t.notes,
-              photos: data.photos || t.photos,
-              location: data.location || t.location,
-            }
+            ...t,
+            name: data.name,
+            description: data.description || '',
+            startTime: data.startTime,
+            endTime: data.endTime,
+            duration: data.duration,
+            color: data.color || t.color,
+            icon: data.icon || t.icon,
+            date: data.date || t.date,
+            recurring: data.recurring || t.recurring,
+            reminder: data.reminder || t.reminder,
+            priority: data.priority || t.priority,
+            category: data.category || t.category,
+            notes: data.notes || t.notes,
+            photos: data.photos || t.photos,
+            location: data.location || t.location,
+          }
           : t
       )
     );
@@ -239,15 +186,15 @@ export const AppProvider = ({ children }) => {
       prev.map((h) =>
         h.id === id
           ? {
-              ...h,
-              name: data.name,
-              description: data.description || '',
-              color: data.color || h.color,
-              icon: data.icon || h.icon,
-              frequencyType: data.frequencyType || h.frequencyType,
-              targetCount: data.targetCount || h.targetCount,
-              reminderTime: data.reminderTime || h.reminderTime,
-            }
+            ...h,
+            name: data.name,
+            description: data.description || '',
+            color: data.color || h.color,
+            icon: data.icon || h.icon,
+            frequencyType: data.frequencyType || h.frequencyType,
+            targetCount: data.targetCount || h.targetCount,
+            reminderTime: data.reminderTime || h.reminderTime,
+          }
           : h
       )
     );
