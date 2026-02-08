@@ -12,7 +12,20 @@
           "package_name": "com.rexforge.quantumhabits"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "124929410484-ks7ca993tq487qecdb3b76ls0cqfcjm2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rexforge.quantumhabits",
+            "certificate_hash": "e2796f55d015cd337b3e72be0650a5078844ae83"
+          }
+        },
+        {
+          "client_id": "124929410484-1qsrbe3uhfqg3p38idhsag3ddl2mpec6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyClC15MQc_m0WZVAYFVwcmlXpcBdqsQg0s"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124929410484-1qsrbe3uhfqg3p38idhsag3ddl2mpec6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,0 +1,201 @@
+PROJECT FILE STRUCTURE FOR FCM + LOCAL + BACKGROUND NOTIFICATIONS
+
+task-tracker/
+├── android/
+│   ├── app/
+│   │   ├── build.gradle
+│   │   │   └── Already has: com.google.firebase:firebase-messaging:23.2.1
+│   │   └── src/main/
+│   │       ├── AndroidManifest.xml
+│   │       │   └── Updated with FCMService registration
+│   │       └── java/com/rexforge/quantumhabits/
+│   │           ├── MainActivity.java
+│   │           │   ├── Added: FirebaseMessaging.getInstance().getToken()
+│   │           │   ├── Stores token in SharedPreferences
+│   │           │   ├── Initializes FCMService
+│   │           │   └── Creates notification channels
+│   │           ├── FCMService.java [NEW]
+│   │           │   ├── Extends FirebaseMessagingService
+│   │           │   ├── Handles onMessageReceived (foreground + background)
+│   │           │   ├── Handles onNewToken (stores FCM token)
+│   │           │   └── Posts notifications via NotificationCompat
+│   │           ├── ReminderPlugin.java
+│   │           │   └── Handles local AlarmManager scheduling
+│   │           ├── ReminderReceiver.java
+│   │           │   └── Triggers when AlarmManager alarm fires
+│   │           └── BootReceiver.java
+│   │               └── Handles device restart
+│   └── gradle.properties
+│       └── Contains SDK versions (already configured)
+│
+├── src/
+│   ├── App.jsx
+│   │   ├── PushNotifications initialization
+│   │   ├── LocalNotifications initialization
+│   │   ├── Foreground notification listener
+│   │   ├── Background notification listener
+│   │   ├── scheduleReminder() function
+│   │   ├── Reminder modal UI
+│   │   └── FCM token state management
+│   ├── components/
+│   ├── hooks/
+│   └── constants/
+│
+├── functions/ [Firebase Cloud Functions - OPTIONAL]
+│   ├── index.js [NEW]
+│   │   ├── sendNotification() - Send to single device
+│   │   ├── sendNotificationHttp() - HTTP endpoint
+│   │   └── sendScheduledReminders() - Daily cron job
+│   └── package.json
+│       ├── firebase-functions
+│       ├── firebase-admin
+│       └── express (optional)
+│
+├── server.js [Node.js Server - OPTIONAL]
+│   ├── POST /api/send-notification
+│   ├── POST /api/send-topic-notification
+│   └── POST /api/send-multicast
+│
+├── capacitor.config.json
+│   └── Already configured with plugins
+│
+├── google-services.json [Android]
+│   └── Located at: android/app/
+│
+├── package.json
+│   ├── @capacitor/push-notifications
+│   ├── @capacitor/local-notifications
+│   └── firebase (client-side)
+│
+├── FCM_REQUEST_EXAMPLES.txt [This file]
+│   └── Example cURL and JSON payloads
+│
+└── FCM_GUARANTEED_PAYLOAD.json
+    └── Production-ready FCM message format
+
+=================================================================
+
+INITIALIZATION ORDER:
+
+1. App starts → MainActivity.onCreate()
+   ├── registerPlugin(PushNotificationsPlugin)
+   ├── registerPlugin(ReminderPlugin)
+   ├── FirebaseMessaging.getInstance().getToken() → Stored in SharedPreferences
+   └── createNotificationChannels() → Creates "fcm_default" and "habit_reminders"
+
+2. React App mounts → App.jsx useEffect
+   ├── LocalNotifications.requestPermissions()
+   ├── PushNotifications.requestPermissions()
+   ├── PushNotifications.register()
+   ├── PushNotifications.getDeliveryId() → Gets FCM token
+   └── Adds listeners for all notification events
+
+3. Notification arrives from Firebase
+   ├── FCMService.onMessageReceived() triggered
+   ├── Checks for data + notification payloads
+   ├── Posts notification via NotificationManager
+   └── Works even if app is completely closed
+
+4. User creates reminder in app
+   ├── App.jsx scheduleReminder() called
+   ├── LocalNotifications.schedule() → In-app notifications
+   └── ReminderPlugin.scheduleReminder() → AlarmManager for closed app
+
+5. Alarm time reached
+   ├── AlarmManager broadcasts intent
+   ├── ReminderReceiver.onReceive() triggered
+   ├── Posts notification via NotificationManager
+   └── Works even if app is killed
+
+=================================================================
+
+KEY NOTIFICATION CHANNELS:
+
+1. "fcm_default"
+   - For Firebase Cloud Messaging
+   - IMPORTANCE_HIGH
+   - Used by FCMService
+
+2. "habit_reminders"
+   - For local AlarmManager reminders
+   - IMPORTANCE_HIGH
+   - Used by ReminderReceiver
+
+=================================================================
+
+PERMISSIONS REQUIRED:
+
+android/app/src/main/AndroidManifest.xml:
+
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.VIBRATE" />
+<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+=================================================================
+
+DEPLOYMENT CHECKLIST:
+
+✅ Android Setup:
+   □ google-services.json in android/app/
+   □ Firebase plugin in build.gradle
+   □ FCMService.java created
+   □ FCMService registered in AndroidManifest.xml
+   □ MainActivity imports FirebaseMessaging
+   □ All permissions added to manifest
+
+✅ React Setup:
+   □ @capacitor/push-notifications installed
+   □ @capacitor/local-notifications installed
+   □ App.jsx has FCM initialization
+   □ Listeners registered for all notification events
+   □ FCM token stored in state/localStorage
+
+✅ Backend Setup:
+   □ Choose: Firebase Cloud Functions OR Node.js server
+   □ Firebase service account key configured
+   □ Endpoints created for sending notifications
+
+✅ Testing:
+   □ App built and deployed to Android device
+   □ Verify FCM token logged in console
+   □ Test foreground notification (app open)
+   □ Test background notification (app backgrounded)
+   □ Test closed app notification (app fully killed)
+   □ Use logcat to verify FCMService.onMessageReceived() called
+
+=================================================================
+
+COMMON ISSUES & SOLUTIONS:
+
+Issue: Notifications not appearing when app closed
+✅ Solution: 
+   - Verify FCMService is registered in manifest
+   - Check notification channel "fcm_default" exists
+   - Ensure payload includes both "notification" AND "data" fields
+   - Use priority: "high" in android.notification
+
+Issue: FCM token not received
+✅ Solution:
+   - Verify google-services.json is correct
+   - Check Firebase console shows app as registered
+   - Device must have Google Play Services installed
+   - Check internet connection
+
+Issue: Reminders not firing in background
+✅ Solution:
+   - Verify ReminderReceiver registered in manifest
+   - Check AlarmManager has SCHEDULE_EXACT_ALARM permission
+   - Use logcat: adb logcat | grep ReminderReceiver
+   - Device doze mode might block AlarmManager
+
+Issue: Notification doesn't open app
+✅ Solution:
+   - Verify PendingIntent in FCMService
+   - Check MainActivity intent flags
+   - Ensure notification listener registered
+
+=================================================================

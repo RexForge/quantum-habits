@@ -88,3 +88,18 @@ export const getCurrentTimeAngle = (currentTime, is12 = false) => {
   }
   return h * 15 + (m / 60) * 15 - 90;
 };
+export const formatTimeAgo = (date) => {
+  if (!date) return 'Just now';
+  // Check for Invalid Date
+  if (isNaN(date.getTime())) return 'Just now';
+
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (isNaN(seconds)) return 'Just now';
+
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+};

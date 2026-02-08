@@ -1,0 +1,341 @@
+FCM TESTING & DEPLOYMENT GUIDE
+
+=================================================================
+PART A: ANDROID SETUP VERIFICATION
+=================================================================
+
+1. Verify google-services.json is present:
+   Location: android/app/google-services.json
+   Should contain: "package_name": "com.rexforge.quantumhabits"
+
+2. Check build.gradle has Firebase plugin:
+   android/app/build.gradle:
+   - "apply plugin: 'com.google.gms.google-services'"
+   - "implementation 'com.google.firebase:firebase-messaging:23.2.1'"
+
+3. Verify AndroidManifest.xml has FCMService:
+   android/app/src/main/AndroidManifest.xml:
+   - <service android:name=".FCMService" ... >
+   - <action android:name="com.google.firebase.MESSAGING_EVENT" />
+
+4. Check all permissions present:
+   - android.permission.INTERNET
+   - android.permission.POST_NOTIFICATIONS
+   - android.permission.SCHEDULE_EXACT_ALARM
+
+=================================================================
+PART B: GET FCM TOKEN
+=================================================================
+
+From React App:
+
+1. Open app and check browser console:
+   "FCM Token received: c_..." 
+   or
+   "FCM Token from listener: c_..."
+
+2. Store this token - you'll use it for testing
+
+3. From Android Studio Logcat:
+   Filter: "MainActivity"
+   Look for: "FCM Token: c_..."
+
+4. From SharedPreferences (Advanced):
+   adb shell am start -n com.android.settings/com.android.settings.Settings$DeveloperSettingsActivity
+   Navigate to: Device File Explorer → data/data/com.rexforge.quantumhabits/shared_prefs/fcm_prefs.xml
+
+=================================================================
+PART C: TEST FOREGROUND NOTIFICATION (App Open)
+=================================================================
+
+1. Open app on Android device/emulator
+
+2. From server or Firebase Console:
+   Send FCM notification to device token
+
+3. Expected: Notification appears in notification bar
+
+4. Check Logcat:
+   adb logcat | grep "FCMService"
+   Expected: "Push notification received in foreground"
+
+=================================================================
+PART D: TEST BACKGROUND NOTIFICATION (App Backgrounded)
+=================================================================
+
+1. Send notification from server while app is in background
+   (Swipe app to background, don't fully close)
+
+2. Expected: Notification appears immediately in notification bar
+
+3. Tap notification: App opens
+
+4. Check Logcat:
+   adb logcat | grep "FCMService"
+   Expected: "onMessageReceived" called
+
+=================================================================
+PART E: TEST CLOSED APP NOTIFICATION
+=================================================================
+
+1. Deploy app to device
+
+2. Open app once to initialize FCM and get token
+
+3. Close app completely:
+   - Android 12+: Swipe app from recents
+   - Older: Settings → Apps → Force stop
+
+4. Send FCM notification from server
+
+5. Expected: Notification appears in notification bar
+            Tapping it opens the app
+
+6. Debugging:
+   adb logcat | grep "FCMService"
+   
+   If not showing:
+   - Run: adb logcat | grep "FirebaseMessaging"
+   - Check for: "Notification posted"
+
+=================================================================
+PART F: SEND TEST NOTIFICATIONS
+=================================================================
+
+OPTION 1: Using Firebase Console
+
+1. Go to https://console.firebase.google.com/
+2. Select your project (QuantumHabits)
+3. Navigation → Messaging → Create a campaign
+4. Select: Cloud Messaging
+5. Create campaign:
+   - Title: "Test Notification"
+   - Body: "This is a test"
+   - Target: Device token (paste your FCM token)
+   - Additional options:
+     * Priority: High
+     * TTL: 3600 seconds
+     * Channel: fcm_default
+
+---
+
+OPTION 2: Using Node.js Server
+
+// Start server:
+npm install express cors firebase-admin dotenv
+node server.js
+
+// In another terminal, send notification:
+curl -X POST http://localhost:3000/api/send-notification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceToken": "YOUR_FCM_TOKEN_HERE",
+    "title": "🎯 Reading",
+    "body": "Time for your reading habit!",
+    "habitIcon": "🎯"
+  }'
+
+---
+
+OPTION 3: Using cURL with Google APIs
+
+// Get access token:
+gcloud auth application-default print-access-token
+
+// Send notification:
+curl -X POST https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send \
+  -H "Authorization: Bearer ACCESS_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": {
+      "token": "YOUR_FCM_TOKEN",
+      "notification": {
+        "title": "Test",
+        "body": "Test body"
+      },
+      "data": {
+        "title": "Test",
+        "body": "Test body"
+      },
+      "android": {
+        "priority": "high",
+        "notification": {
+          "channelId": "fcm_default",
+          "priority": "max"
+        }
+      }
+    }
+  }'
+
+---
+
+OPTION 4: Using Postman
+
+1. Create POST request to:
+   https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send
+
+2. Headers:
+   - Authorization: Bearer YOUR_ACCESS_TOKEN
+   - Content-Type: application/json
+
+3. Body (raw JSON):
+   {
+     "message": {
+       "token": "YOUR_FCM_TOKEN",
+       "notification": {
+         "title": "Test Notification",
+         "body": "This is from Postman"
+       },
+       "data": {
+         "title": "Test Notification",
+         "body": "This is from Postman"
+       },
+       "android": {
+         "priority": "high",
+         "notification": {
+           "channelId": "fcm_default",
+           "priority": "max"
+         }
+       }
+     }
+   }
+
+=================================================================
+PART G: DEBUG WITH LOGCAT
+=================================================================
+
+Monitor all notification events:
+
+adb logcat | grep -E "FCMService|ReminderReceiver|ReminderPlugin|MainActivity"
+
+Expected output for successful flow:
+
+[App Start]
+MainActivity: FCM Token: c_xyz123...
+
+[Notification Received - App in Background]
+FCMService: onMessageReceived called
+FCMService: Message received: 0:123456789
+FCMService: Posting notification: 🎯 Reading
+
+[Notification Tapped]
+App opens and foreground listener triggered
+
+[Closed App Notification]
+Device broadcasts notification via FCMService
+FCMService: Notification posted successfully
+
+=================================================================
+PART H: PRODUCTION DEPLOYMENT
+=================================================================
+
+1. Build Release APK:
+   cd android
+   ./gradlew bundleRelease
+   
+   OR for APK:
+   ./gradlew assembleRelease
+
+2. Output location:
+   android/app/build/outputs/bundle/release/app-release.aab
+   OR
+   android/app/build/outputs/apk/release/app-release.apk
+
+3. Sign APK (if not already signed):
+   jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
+     -keystore my-release-key.keystore \
+     app-release-unsigned.apk alias_name
+
+4. Deploy to:
+   - Google Play Store
+   - Firebase App Distribution (testing)
+   - Direct device installation
+
+5. After deployment:
+   - Test all 3 notification states (foreground, background, closed)
+   - Monitor Crashlytics for errors
+   - Check Firebase Console for delivery metrics
+
+=================================================================
+PART I: TROUBLESHOOTING
+=================================================================
+
+Problem: FCM token not received
+- Clear app data: adb shell pm clear com.rexforge.quantumhabits
+- Reinstall app
+- Check google-services.json is correct
+- Verify Firebase project ID matches
+
+Problem: Notification not appearing
+- Check notification channel "fcm_default" exists
+- Verify payload includes both "notification" AND "data"
+- Check Android version supports notifications
+- Verify internet connection on device
+
+Problem: Only works in foreground
+- FCMService.onMessageReceived() not called when closed
+- Solution: Rebuild app with `npm run cap:build`
+- Check manifest has FCMService registered
+
+Problem: Notifications appear but don't open app
+- Check PendingIntent flags in FCMService
+- Verify MainActivity is launchable
+- Check intent filters in manifest
+
+Logcat filter for errors:
+adb logcat | grep -i "error\|exception"
+
+Get full device logs:
+adb logcat > device.log
+cat device.log | grep FCM
+
+=================================================================
+PART J: LOCAL REMINDER TESTING
+=================================================================
+
+Testing AlarmManager reminders (for closed app):
+
+1. Create reminder for 1 minute from now
+2. Close app completely
+3. Wait for reminder time
+4. Notification should appear via ReminderReceiver
+
+Check Logcat:
+adb logcat | grep "ReminderReceiver"
+
+Expected:
+"ReminderReceiver: onReceive called"
+"ReminderReceiver: Posting notification"
+
+=================================================================
+FINAL CHECKLIST
+=================================================================
+
+✅ Android Setup:
+   □ google-services.json present
+   □ Firebase dependencies added
+   □ FCMService.java created
+   □ FCMService registered in manifest
+   □ All permissions added
+   □ Notification channels created in MainActivity
+
+✅ React Setup:
+   □ PushNotifications listeners registered
+   □ FCM token stored
+   □ LocalNotifications initialized
+   □ scheduleReminder() function working
+
+✅ Testing:
+   □ Foreground notification works
+   □ Background notification works
+   □ Closed app notification works
+   □ Tapping notification opens app
+   □ Reminders fire at correct times
+
+✅ Deployment:
+   □ Release APK built and signed
+   □ All 3 notification types tested
+   □ Logcat shows no errors
+   □ Firebase Console shows deliveries
+
+=================================================================

@@ -31,8 +31,7 @@ public class HabitReminderPlugin extends Plugin {
                 if (reminders != null) {
                     for (int j = 0; j < reminders.length(); j++) {
                         JSONObject reminder = reminders.getJSONObject(j);
-                        if (!reminder.optBoolean("enabled", false))
-                            continue;
+                        if (!reminder.optBoolean("enabled", false)) continue;
 
                         String message = reminder.optString("message", "Time for your habit!");
                         String type = reminder.optString("type", "specific");
@@ -47,8 +46,9 @@ public class HabitReminderPlugin extends Plugin {
                                     if (reminderTime > now) {
                                         String reminderId = "habit-" + habitId + "-reminder-" + j + "-time-" + k;
                                         HabitReminderService.scheduleReminder(
-                                                getContext(), reminderId, habitName, message, habitColor,
-                                                reminderTime, habitId, j);
+                                            getContext(), reminderId, habitName, message, habitColor,
+                                            reminderTime, habitId, j
+                                        );
                                     }
                                 }
                             }
@@ -62,8 +62,9 @@ public class HabitReminderPlugin extends Plugin {
                                 if (intervalTimes[k] > now) {
                                     String reminderId = "habit-" + habitId + "-reminder-" + j + "-interval-" + k;
                                     HabitReminderService.scheduleReminder(
-                                            getContext(), reminderId, habitName, message, habitColor,
-                                            intervalTimes[k], habitId, j);
+                                        getContext(), reminderId, habitName, message, habitColor,
+                                        intervalTimes[k], habitId, j
+                                    );
                                 }
                             }
                         }
@@ -86,7 +87,7 @@ public class HabitReminderPlugin extends Plugin {
         HabitReminderService.cancelReminders(getContext(), habitId);
         call.resolve();
     }
-
+    
     private long calculateNextReminderTime(String timeStr) {
         try {
             String[] parts = timeStr.split(":");
@@ -153,7 +154,7 @@ public class HabitReminderPlugin extends Plugin {
 
             return result;
         } catch (Exception e) {
-            return new long[] { System.currentTimeMillis() + 60 * 60 * 1000 }; // Default to 1 hour from now
+            return new long[]{System.currentTimeMillis() + 60 * 60 * 1000}; // Default to 1 hour from now
         }
     }
 }

@@ -1,0 +1,71 @@
+// EXAMPLE 1: Send to single device token
+// POST http://localhost:3000/api/send-notification
+
+{
+  "deviceToken": "FCM_DEVICE_TOKEN_HERE",
+  "title": "🎯 Reading",
+  "body": "Time for your reading habit!",
+  "habitIcon": "🎯",
+  "data": {
+    "habitId": "habit_1",
+    "type": "habit_reminder"
+  }
+}
+
+// RESPONSE:
+{
+  "success": true,
+  "messageId": "0:1234567890123456789"
+}
+
+---
+
+// EXAMPLE 2: Send to topic (all users subscribed to topic)
+// POST http://localhost:3000/api/send-topic-notification
+
+{
+  "topic": "all_users",
+  "title": "📢 App Update",
+  "body": "New features available!",
+  "habitIcon": "📢"
+}
+
+---
+
+// EXAMPLE 3: Send to multiple devices (multicast)
+// POST http://localhost:3000/api/send-multicast
+
+{
+  "deviceTokens": [
+    "TOKEN_1",
+    "TOKEN_2",
+    "TOKEN_3"
+  ],
+  "title": "🔔 Reminder",
+  "body": "Check your habits!",
+  "habitIcon": "🔔"
+}
+
+// RESPONSE:
+{
+  "success": true,
+  "successCount": 3,
+  "failureCount": 0,
+  "responses": [
+    { "success": true, "messageId": "0:123" },
+    { "success": true, "messageId": "0:124" },
+    { "success": true, "messageId": "0:125" }
+  ]
+}
+
+---
+
+// EXAMPLE 4: cURL command
+curl -X POST http://localhost:3000/api/send-notification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "deviceToken": "YOUR_FCM_TOKEN",
+    "title": "🎯 Habit Reminder",
+    "body": "Time to complete your habit!",
+    "habitIcon": "🎯"
+  }'

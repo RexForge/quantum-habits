@@ -40,7 +40,7 @@ subprojects {
                 
                 // Capacitor 5+ modules often miss the namespace
                 if (namespace == null) {
-                    namespace = "com.workadayvoid.quantumhabits." + project.name.replace(':', '').replace('-', '.')
+                    namespace = "com.rexforge.quantumhabits." + project.name.replace(':', '').replace('-', '.')
                 }
             }
         }
