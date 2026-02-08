@@ -1,0 +1,95 @@
+// package.json - Required dependencies
+
+{
+  "name": "quantumhabits",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cap:sync": "npx cap sync android",
+    "cap:build": "npm run build && npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:run": "npx cap run android --external",
+    "server": "node server.js",
+    "deploy:functions": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "framer-motion": "^10.16.4",
+    "lucide-react": "^0.263.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/app": "^5.0.0",
+    "@capacitor/status-bar": "^5.0.0",
+    "@capacitor/push-notifications": "^5.0.0",
+    "@capacitor/local-notifications": "^5.0.0",
+    "@capacitor/camera": "^5.0.0",
+    "@capacitor/geolocation": "^5.0.0",
+    "@capacitor/haptics": "^5.0.0",
+    "firebase": "^9.23.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^4.3.9",
+    "vite-plugin-capacitor": "^0.0.3"
+  }
+}
+
+// For Node.js Server (server.js):
+
+{
+  "name": "quantumhabits-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "firebase-admin": "^12.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+
+// For Firebase Cloud Functions (functions/package.json):
+
+{
+  "name": "functions",
+  "version": "1.0.0",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-functions": "^4.3.0",
+    "firebase-admin": "^12.0.0"
+  },
+  "engines": {
+    "node": "18"
+  }
+}
+
+// Installation commands:
+
+// Main app:
+npm install
+
+// Server (if using Node.js):
+npm install express cors dotenv firebase-admin
+
+// Cloud Functions (if using Firebase):
+cd functions
+npm install
+firebase deploy --only functions
+
+// Capacitor sync after dependencies:
+npm run cap:sync

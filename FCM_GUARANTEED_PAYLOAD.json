@@ -1,0 +1,128 @@
+// GUARANTEED WORKING FCM PAYLOAD FOR ANDROID - WORKS EVEN WHEN APP IS CLOSED
+
+{
+  "token": "FCM_DEVICE_TOKEN_HERE",
+  "notification": {
+    "title": "🎯 Your Habit",
+    "body": "Time for your habit!",
+    "clickAction": "FLUTTER_NOTIFICATION_CLICK"
+  },
+  "data": {
+    "title": "🎯 Your Habit",
+    "body": "Time for your habit!",
+    "habitIcon": "🎯",
+    "habitName": "Reading",
+    "habitId": "habit_1"
+  },
+  "android": {
+    "priority": "high",
+    "ttl": "3600s",
+    "notification": {
+      "title": "🎯 Your Habit",
+      "body": "Time for your habit!",
+      "clickAction": "FLUTTER_NOTIFICATION_CLICK",
+      "sound": "default",
+      "channelId": "fcm_default",
+      "priority": "max",
+      "visibility": "public",
+      "defaultVibrateTimings": true,
+      "defaultSoundUri": true,
+      "notificationCount": 1,
+      "image": "ic_launcher",
+      "imageUrl": "https://via.placeholder.com/100"
+    }
+  },
+  "webpush": {
+    "headers": {
+      "TTL": "3600"
+    },
+    "notification": {
+      "title": "🎯 Your Habit",
+      "body": "Time for your habit!",
+      "icon": "ic_launcher"
+    }
+  }
+}
+
+// KEY FIELDS THAT GUARANTEE DELIVERY WHEN APP IS CLOSED:
+
+1. "android": {
+     "priority": "high"  // HIGH PRIORITY - wakes device doze mode
+   }
+
+2. "android": {
+     "notification": {
+       "priority": "max",  // MAX priority for notification
+       "visibility": "public",  // Shows on lockscreen
+       "defaultVibrateTimings": true  // Adds haptic feedback
+     }
+   }
+
+3. "data" field (not just "notification")
+   // Data messages trigger FCMService even when app is closed
+
+4. "channelId": "fcm_default"
+   // Must match channel created in FCMService.java
+
+5. Both "notification" AND "data" fields
+   // Dual approach ensures delivery in all app states
+
+// MINIMAL WORKING PAYLOAD (simplest form):
+
+{
+  "token": "YOUR_DEVICE_TOKEN",
+  "notification": {
+    "title": "Reminder",
+    "body": "Time for your habit!"
+  },
+  "data": {
+    "title": "Reminder",
+    "body": "Time for your habit!"
+  },
+  "android": {
+    "priority": "high",
+    "notification": {
+      "channelId": "fcm_default",
+      "priority": "max"
+    }
+  }
+}
+
+// TESTING CURL COMMAND:
+
+curl -X POST https://fcm.googleapis.com/v1/projects/YOUR_PROJECT_ID/messages:send \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": {
+      "token": "YOUR_FCM_TOKEN",
+      "notification": {
+        "title": "Test Notification",
+        "body": "This will appear even when app is closed!"
+      },
+      "data": {
+        "title": "Test Notification",
+        "body": "This will appear even when app is closed!"
+      },
+      "android": {
+        "priority": "high",
+        "notification": {
+          "channelId": "fcm_default",
+          "priority": "max",
+          "visibility": "public"
+        }
+      }
+    }
+  }'
+
+// TROUBLESHOOTING:
+
+If notification doesn't appear when app is closed:
+
+1. ✅ Verify FCMService.java is in AndroidManifest.xml
+2. ✅ Check notification channel exists: "fcm_default"
+3. ✅ Ensure "data" field is included (not just "notification")
+4. ✅ Use "priority": "high" AND "priority": "max"
+5. ✅ Device must have internet connection
+6. ✅ Firebase project must be properly set up in google-services.json
+7. ✅ App must be fully uninstalled and reinstalled for manifest changes

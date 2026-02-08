@@ -1,5 +1,15 @@
 {
   "appId": "com.rexforge.quantumhabits",
   "appName": "QuantumHabits",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email"
+      ],
+      "serverClientId": "124929410484-1qsrbe3uhfqg3p38idhsag3ddl2mpec6.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }
