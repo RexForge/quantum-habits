@@ -394,7 +394,11 @@ input:checked+.native-slider:before {
 .dark .bottom-nav {
   border-top-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.04), 0 -2px 16px rgba(0, 0, 0, 0.4) !important;
-  background: rgba(17, 24, 39, 0.92) !important;
+  background: var(--bg-dark-tinted) !important;
+}
+
+.bottom-nav {
+  background: var(--bg-light-tinted) !important;
 }
 
 .bottom-nav-item {
