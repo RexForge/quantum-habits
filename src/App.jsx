@@ -923,7 +923,7 @@ const HabitTracker = () => {
   };
 
   // Theme
-  const cardClasses = `bg-panel border-gray-700 dark:border-gray-700 border-gray-200 light:border-gray-200 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`;
+  const cardClasses = theme === 'dark' ? 'bg-panel border-gray-700' : 'bg-panel border-gray-200';
 
   const NavButton = ({ id, label, icon: Icon, active }) => (
     <button
