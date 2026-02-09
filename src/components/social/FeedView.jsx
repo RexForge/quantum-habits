@@ -430,7 +430,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                     <div className="mb-10">
                         <div className="flex items-center justify-between mb-4">
                             <p className={`text-[10px] font-black uppercase tracking-widest opacity-50 ${textColor}`}>Active Explorers</p>
-                            <span className="text-[9px] font-bold text-blue-500 flex items-center gap-1">Live <ChevronRight className="w-3 h-3" /></span>
+                            <span className="text-[9px] font-bold flex items-center gap-1" style={{ color: themeColors.primary }}>Live <ChevronRight className="w-3 h-3" /></span>
                         </div>
                         <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide py-1 -mx-2 px-2">
                             {activeUsers.map(u => (
