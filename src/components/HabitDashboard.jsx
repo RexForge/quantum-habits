@@ -49,14 +49,14 @@ const HabitDashboard = () => {
     <div className="space-y-6 pb-24 animate-in fade-in duration-500">
       {/* --- Stats Overview Cards --- */}
       <div className="grid grid-cols-2 gap-4">
-        <div className={`p-4 rounded-3xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
+        <div className={`p-4 rounded-3xl bg-panel ${theme === 'dark' ? '' : 'shadow-sm'} border border-gray-200/10`}>
           <div className="flex items-center gap-2 text-orange-500 mb-1">
             <Flame size={18} />
             <span className="text-sm font-bold">Best Streak</span>
           </div>
           <div className="text-2xl font-black">12 Days</div>
         </div>
-        <div className={`p-4 rounded-3xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
+        <div className={`p-4 rounded-3xl bg-panel ${theme === 'dark' ? '' : 'shadow-sm'} border border-gray-200/10`}>
           <div className="flex items-center gap-2 text-blue-500 mb-1">
             <TrendingUp size={18} />
             <span className="text-sm font-bold">Completion</span>
