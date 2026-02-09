@@ -925,7 +925,8 @@ const HabitTracker = () => {
         {active && (
           <motion.div
             layoutId="activeTab"
-            className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${theme === 'dark' ? 'bg-blue-400' : 'bg-blue-600'}`}
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+            style={{ backgroundColor: themeColors.primary }}
           />
         )}
       </div>
