@@ -1305,7 +1305,7 @@ const HabitTracker = () => {
                           const isToday = dStr === today;
 
                           return (
-                            <div key={i} className="flex flex-col items-center gap-2.5 flex-1 min-w-0">
+                            <div key={`${habit.id}-${dStr}`} className="flex flex-col items-center gap-2.5 flex-1 min-w-0">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
