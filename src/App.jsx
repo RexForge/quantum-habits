@@ -1559,7 +1559,7 @@ const HabitTracker = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.25 }}
-              className={`fixed inset-y-0 left-0 w-64 z-50 shadow-2xl flex flex-col status-bar-safe ${theme === 'dark' ? 'bg-gray-900 border-r border-gray-800' : 'bg-white border-r border-gray-200'}`}
+              className={`fixed inset-y-0 left-0 w-64 z-50 shadow-2xl flex flex-col status-bar-safe bg-panel border-r ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
               style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
               <div className="px-4 pt-8 pb-4 flex items-center justify-between">
