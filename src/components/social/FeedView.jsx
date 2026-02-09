@@ -8,7 +8,7 @@ import { ref, push, set, onValue, off, query as rtdbQuery, orderByChild, equalTo
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { formatTimeAgo } from '../../utils/timeHelpers';
 
-const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
+const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostModal }) => {
     const { user, loginWithGoogle, loginAnonymously } = useAuth();
     const [posts, setPosts] = useState([]);
     const [activeFilter, setActiveFilter] = useState('all'); // all, milestones, friends, me (visual only)
