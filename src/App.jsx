@@ -2720,9 +2720,9 @@ const HabitTracker = () => {
             {profilePicModalMode === 'premade' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                  {premadeAvatars.map((avatar, idx) => (
+                  {premadeAvatars.map((avatar) => (
                     <button
-                      key={idx}
+                      key={avatar.url}
                       onClick={() => selectPremadeAvatar(avatar.url)}
                       disabled={uploadingProfilePic}
                       className={`aspect-square rounded-full overflow-hidden ring-4 transition-all active:scale-90 hover:scale-110 ${
