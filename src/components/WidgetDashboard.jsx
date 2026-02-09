@@ -45,8 +45,8 @@ const WidgetDashboard = () => {
   return (
     <div className="space-y-4">
       {/* 1. "The Now" Widget */}
-      <div className={`p-6 rounded-[2.5rem] border ${
-        theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100 shadow-sm'
+      <div className={`p-6 rounded-[2.5rem] border bg-panel ${
+        theme === 'dark' ? 'border-gray-700' : 'border-gray-100 shadow-sm'
       }`}>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -95,10 +95,10 @@ const WidgetDashboard = () => {
 
       {/* 3. Up Next Widget */}
       {metrics.nextTask && (
-        <button 
+        <button
           onClick={() => setViewMode('day')}
-          className={`w-full p-5 rounded-[2.5rem] flex items-center justify-between group transition-all ${
-            theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-100 shadow-sm'
+          className={`w-full p-5 rounded-[2.5rem] flex items-center justify-between group transition-all bg-panel ${
+            theme === 'dark' ? 'hover:opacity-80' : 'border border-gray-100 shadow-sm hover:shadow-md'
           }`}
         >
           <div className="flex items-center gap-4">

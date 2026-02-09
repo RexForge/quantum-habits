@@ -49,14 +49,14 @@ const HabitDashboard = () => {
     <div className="space-y-6 pb-24 animate-in fade-in duration-500">
       {/* --- Stats Overview Cards --- */}
       <div className="grid grid-cols-2 gap-4">
-        <div className={`p-4 rounded-3xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
+        <div className={`p-4 rounded-3xl bg-panel ${theme === 'dark' ? '' : 'shadow-sm'} border border-gray-200/10`}>
           <div className="flex items-center gap-2 text-orange-500 mb-1">
             <Flame size={18} />
             <span className="text-sm font-bold">Best Streak</span>
           </div>
           <div className="text-2xl font-black">12 Days</div>
         </div>
-        <div className={`p-4 rounded-3xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
+        <div className={`p-4 rounded-3xl bg-panel ${theme === 'dark' ? '' : 'shadow-sm'} border border-gray-200/10`}>
           <div className="flex items-center gap-2 text-blue-500 mb-1">
             <TrendingUp size={18} />
             <span className="text-sm font-bold">Completion</span>
@@ -73,7 +73,7 @@ const HabitDashboard = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === tab
               ? 'bg-blue-600 text-white'
-              : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
+              : `bg-panel ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`
               }`}
           >
             {tab}
@@ -91,8 +91,7 @@ const HabitDashboard = () => {
             <div
               key={habit.id}
               onClick={() => setSelectedHabitForCalendar(habit)}
-              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                } border border-gray-200/10 shadow-sm`}
+              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer bg-panel border border-gray-200/10 ${theme === 'dark' ? '' : 'shadow-sm'}`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">

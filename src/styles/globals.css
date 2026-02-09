@@ -25,6 +25,8 @@
   --radius: 0.75rem;
   --app-height: 100%;
   --blue-glow: 0 0 20px rgba(59, 130, 246, 0.4);
+  --bg-light-tinted: #f5f7fb;
+  --bg-dark-tinted: #0f1620;
 }
 
 .dark {
@@ -47,6 +49,26 @@
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 48%;
+  --bg-light-tinted: #f5f7fb;
+  --bg-dark-tinted: #0f1620;
+}
+
+/* Tinted Background Utilities */
+.bg-panel-light {
+  background-color: var(--bg-light-tinted);
+}
+
+.dark .bg-panel-dark,
+.bg-panel-light.dark {
+  background-color: var(--bg-dark-tinted);
+}
+
+.bg-panel {
+  background-color: var(--bg-light-tinted);
+}
+
+.dark .bg-panel {
+  background-color: var(--bg-dark-tinted);
 }
 
 /* 1. Mobile Viewport Fix */
@@ -372,7 +394,11 @@ input:checked+.native-slider:before {
 .dark .bottom-nav {
   border-top-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.04), 0 -2px 16px rgba(0, 0, 0, 0.4) !important;
-  background: rgba(17, 24, 39, 0.92) !important;
+  background: var(--bg-dark-tinted) !important;
+}
+
+.bottom-nav {
+  background: var(--bg-light-tinted) !important;
 }
 
 .bottom-nav-item {

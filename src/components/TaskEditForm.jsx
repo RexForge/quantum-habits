@@ -39,10 +39,10 @@ const TaskEditForm = ({ task, theme, onSave, onCancel }) => {
 
   return (
     <div
-      className={`rounded-2xl p-4 border ${
+      className={`rounded-2xl p-4 border bg-panel ${
         theme === 'dark'
-          ? 'bg-gray-800 border-gray-700'
-          : 'bg-white border-gray-200'
+          ? 'border-gray-700'
+          : 'border-gray-200'
       }`}
     >
       <div className="flex items-center justify-between mb-3">

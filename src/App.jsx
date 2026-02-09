@@ -173,7 +173,41 @@ const HabitTracker = () => {
     root.style.setProperty('--color-primary', themeColors.primary);
     root.style.setProperty('--color-secondary', themeColors.secondary);
     root.style.setProperty('--color-accent', themeColors.accent);
-  }, [themeColors]);
+
+    // Set tinted backgrounds based on theme mode
+    const primaryColor = themeColors.primary;
+
+    // Convert hex to RGB and blend
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    };
+
+    const primaryRgb = hexToRgb(primaryColor);
+    if (primaryRgb) {
+      if (themeMode === 'dark') {
+        // Dark mode: 8% blend of primary into #1f2937 (dark gray)
+        const baseRgb = { r: 31, g: 41, b: 55 };
+        const blendedR = Math.round(baseRgb.r + (primaryRgb.r - baseRgb.r) * 0.08);
+        const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.08);
+        const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.08);
+        root.style.setProperty('--bg-dark-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+        root.style.setProperty('--bg-dark-tinted-rgb', `${blendedR}, ${blendedG}, ${blendedB}`);
+      } else {
+        // Light mode: 6% blend of primary into #f3f4f6 (light gray)
+        const baseRgb = { r: 243, g: 244, b: 246 };
+        const blendedR = Math.round(baseRgb.r + (primaryRgb.r - baseRgb.r) * 0.06);
+        const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.06);
+        const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.06);
+        root.style.setProperty('--bg-light-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+        root.style.setProperty('--bg-light-tinted-rgb', `${blendedR}, ${blendedG}, ${blendedB}`);
+      }
+    }
+  }, [themeColors, themeMode]);
 
   // Sync Habits with Firestore
   useEffect(() => {
@@ -912,7 +946,7 @@ const HabitTracker = () => {
   };
 
   // Theme
-  const cardClasses = theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
+  const cardClasses = theme === 'dark' ? 'bg-panel border-gray-700' : 'bg-panel border-gray-200';
 
   const NavButton = ({ id, label, icon: Icon, active }) => (
     <button
@@ -937,11 +971,15 @@ const HabitTracker = () => {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen safe-area-padding">
+    <div className="bg-panel text-foreground min-h-screen safe-area-padding">
       {/* Header */}
       {/* Header */}
       {/* Top Header System */}
-      <div className={`sticky top-0 z-40 transition-all duration-300 ${theme === 'dark' ? 'bg-gray-950/80 border-b border-white/5' : 'bg-white/90 border-b border-gray-100'} backdrop-blur-2xl`}>
+      <div className={`sticky top-0 z-40 transition-all duration-300 backdrop-blur-2xl border-b ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}`}
+        style={{
+          backgroundColor: theme === 'dark' ? `rgba(var(--bg-dark-tinted-rgb), 0.85)` : `rgba(var(--bg-light-tinted-rgb), 0.9)`
+        }}
+      >
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -1322,7 +1360,7 @@ const HabitTracker = () => {
                                 }}
                                 className={`w-full aspect-square rounded-xl transition-all active:scale-90 border-2 shadow-sm ${isDone
                                   ? 'border-transparent'
-                                  : `${theme === 'dark' ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-100'}`
+                                  : `bg-panel ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`
                                   }`}
                                 style={{
                                   backgroundColor: isDone ? habit.color : '',
@@ -1527,7 +1565,7 @@ const HabitTracker = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.25 }}
-              className={`fixed inset-y-0 left-0 w-64 z-50 shadow-2xl flex flex-col status-bar-safe ${theme === 'dark' ? 'bg-gray-900 border-r border-gray-800' : 'bg-white border-r border-gray-200'}`}
+              className={`fixed inset-y-0 left-0 w-64 z-50 shadow-2xl flex flex-col status-bar-safe bg-panel border-r ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
               style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
               <div className="px-4 pt-8 pb-4 flex items-center justify-between">
@@ -1612,7 +1650,7 @@ const HabitTracker = () => {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-2xl px-1 pt-2"
         style={{
-          backgroundColor: theme === 'dark' ? 'rgba(3, 7, 30, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: theme === 'dark' ? 'var(--bg-dark-tinted)' : 'var(--bg-light-tinted)',
           borderTop: theme === 'dark' ? `1px solid ${themeColors.primary}20` : `1px solid ${themeColors.primary}15`,
           paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
         }}
@@ -2158,7 +2196,7 @@ const HabitTracker = () => {
                               ? 'text-white shadow-lg shadow-black/5'
                               : isFutur
                                 ? 'opacity-10 cursor-not-allowed'
-                                : `${theme === 'dark' ? 'bg-gray-900 border-2' : 'bg-white border-2'}`
+                                : `bg-panel border-2`
                               }`}
                             style={{
                               backgroundColor: isCompleted ? habit.color : '',
@@ -2244,9 +2282,9 @@ const HabitTracker = () => {
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
                     placeholder="Any thoughts? Add a note!"
-                    className={`w-full h-40 p-4 rounded-2xl border-2 transition-all resize-none font-medium focus:ring-0 ${theme === 'dark'
-                      ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-600'
-                      : 'bg-gray-50 border-gray-100 text-gray-800 placeholder-gray-400'
+                    className={`w-full h-40 p-4 rounded-2xl border-2 transition-all resize-none font-medium focus:ring-0 bg-panel ${theme === 'dark'
+                      ? 'border-gray-700 text-white placeholder-gray-600'
+                      : 'border-gray-100 text-gray-800 placeholder-gray-400'
                       }`}
                   />
                 </div>
@@ -2295,7 +2333,7 @@ const HabitTracker = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed inset-y-0 right-0 w-[85%] max-w-sm z-[71] shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900 border-l border-gray-800' : 'bg-white border-l border-gray-200'}`}
+              className={`fixed inset-y-0 right-0 w-[85%] max-w-sm z-[71] shadow-2xl flex flex-col bg-panel border-l ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
               style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
               <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
@@ -2499,7 +2537,7 @@ const HabitTracker = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-t-3xl sm:rounded-3xl p-6 w-full sm:w-[90%] sm:max-w-md shadow-2xl max-h-[85vh] overflow-y-auto`}
+            className={`bg-panel rounded-t-3xl sm:rounded-3xl p-6 w-full sm:w-[90%] sm:max-w-md shadow-2xl max-h-[85vh] overflow-y-auto`}
           >
             {/* Header */}
             {profilePicModalMode !== 'camera' && (
@@ -2896,7 +2934,7 @@ const HabitTracker = () => {
         showReminders && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 modal-backdrop-safe" onClick={() => setShowReminders(false)}>
             <div
-              className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} w-full mobile-bottom-sheet max-h-[85vh] overflow-y-auto rounded-t-3xl`}
+              className={`bg-panel w-full mobile-bottom-sheet max-h-[85vh] overflow-y-auto rounded-t-3xl`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mobile-sheet-handle" />

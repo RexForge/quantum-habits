@@ -95,8 +95,7 @@ const HabitForm = ({ onSave, onCancel, theme, habit = null, existingHabits = [],
             onClick={onCancel}
         >
             <div
-                className={`w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl ${(theme === 'dark' || theme === 'neon') ? 'bg-gray-900' : 'bg-white'
-                    } p-6 space-y-6 transform transition-all ${theme === 'neon' ? 'neon-panel ring-2 ring-white/10' : 'border border-gray-800'}`}
+                className={`w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl bg-panel p-6 space-y-6 transform transition-all ${theme === 'neon' ? 'neon-panel ring-2 ring-white/10' : 'border border-gray-800'}`}
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between">
@@ -241,9 +240,9 @@ const HabitForm = ({ onSave, onCancel, theme, habit = null, existingHabits = [],
                             {reminders.map((reminder, index) => (
                                 <div
                                     key={index}
-                                    className={`p-4 rounded-2xl border transition-all ${(theme === 'dark' || theme === 'neon')
-                                        ? 'bg-gray-800/40 border-gray-700 hover:border-gray-600'
-                                        : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
+                                    className={`p-4 rounded-2xl border transition-all bg-panel ${(theme === 'dark' || theme === 'neon')
+                                        ? 'border-gray-700 hover:border-gray-600'
+                                        : 'border-gray-200 shadow-sm hover:shadow-md'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-4">
