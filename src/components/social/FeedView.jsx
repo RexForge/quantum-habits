@@ -692,16 +692,24 @@ const FilterIconTab = ({ active, icon, label, onClick, isDark, themeColors }) =>
     </button>
 );
 
-const PostTypeToggle = ({ active, icon, color, onClick, isDark }) => {
-    const colorClasses = {
-        orange: active ? 'bg-orange-500 text-white' : (isDark ? 'hover:bg-orange-500/10 text-orange-500/50' : 'hover:bg-orange-50 text-orange-500/50'),
-        blue: active ? 'bg-blue-500 text-white' : (isDark ? 'hover:bg-blue-500/10 text-blue-500/50' : 'hover:bg-blue-50 text-blue-500/50'),
-        emerald: active ? 'bg-emerald-500 text-white' : (isDark ? 'hover:bg-emerald-500/10 text-emerald-500/50' : 'hover:bg-emerald-50 text-emerald-500/50')
-    };
+const PostTypeToggle = ({ active, icon, color, onClick, isDark, themeColors }) => {
+    let styleColor;
+    if (color === 'blue') {
+        styleColor = themeColors?.primary || '#3b82f6';
+    } else if (color === 'orange') {
+        styleColor = '#f97316';
+    } else if (color === 'emerald') {
+        styleColor = '#10b981';
+    }
+
     return (
         <button
             onClick={onClick}
-            className={`p-2.5 rounded-xl transition-all active:scale-90 ${colorClasses[color]}`}
+            className="p-2.5 rounded-xl transition-all active:scale-90 text-white"
+            style={{
+                backgroundColor: active ? styleColor : 'transparent',
+                color: active ? 'white' : styleColor,
+            }}
         >
             {icon}
         </button>
