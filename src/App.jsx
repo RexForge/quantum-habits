@@ -2190,7 +2190,7 @@ const HabitTracker = () => {
                               ? 'text-white shadow-lg shadow-black/5'
                               : isFutur
                                 ? 'opacity-10 cursor-not-allowed'
-                                : `${theme === 'dark' ? 'bg-gray-900 border-2' : 'bg-white border-2'}`
+                                : `bg-panel border-2`
                               }`}
                             style={{
                               backgroundColor: isCompleted ? habit.color : '',
