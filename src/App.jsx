@@ -925,20 +925,16 @@ const HabitTracker = () => {
       <div className={`relative ${active ? 'scale-110 -translate-y-0.5' : 'scale-100'} transition-all duration-300`}>
         <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5px]' : 'stroke-2'}`} />
       </div>
-      {active && (
-        <motion.div
-          layoutId="activeTab"
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-          style={{ backgroundColor: themeColors.primary }}
-          initial={false}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        />
-      )}
       <span className={`text-[8.5px] font-black uppercase tracking-tight mt-1 truncate w-full px-1 ${active ? 'opacity-100' : 'opacity-40'}`}>
         {label}
       </span>
     </button>
   );
+
+  const getActiveTabIndex = () => {
+    const tabOrder = ['habits', 'weekly', 'feed', 'groups', 'stats'];
+    return tabOrder.indexOf(currentView);
+  };
 
   return (
     <div className="bg-background text-foreground min-h-screen safe-area-padding">
