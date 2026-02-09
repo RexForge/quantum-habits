@@ -1136,10 +1136,11 @@ const HabitTracker = () => {
                                       setNoteText(habit.notes?.[today] || '');
                                       if (navigator.vibrate) navigator.vibrate(5);
                                     }}
-                                    className={`flex items-center gap-1.5 transition-all active:scale-90 px-1.5 py-0.5 rounded-lg ${habit.notes?.[today]
-                                      ? theme === 'dark' ? 'text-blue-400 bg-blue-400/10' : 'text-blue-600 bg-blue-50'
-                                      : 'text-gray-400 hover:text-gray-500'
-                                      }`}
+                                    className="flex items-center gap-1.5 transition-all active:scale-90 px-1.5 py-0.5 rounded-lg"
+                                    style={{
+                                      color: habit.notes?.[today] ? themeColors.primary : '#9ca3af',
+                                      backgroundColor: habit.notes?.[today] ? `${themeColors.primary}15` : 'transparent',
+                                    }}
                                   >
                                     <FileText className="w-3.5 h-3.5" />
                                     {habit.notes?.[today] && <span className="text-[10px] font-black uppercase tracking-wider">Note</span>}
