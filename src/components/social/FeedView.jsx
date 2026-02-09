@@ -572,6 +572,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                         color="blue"
                                         onClick={() => setPostType('text')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <PostTypeToggle
                                         active={postType === 'reflection'}
@@ -579,6 +580,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                         color="orange"
                                         onClick={() => setPostType('reflection')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <PostTypeToggle
                                         active={postType === 'goal'}
@@ -586,6 +588,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                         color="emerald"
                                         onClick={() => setPostType('goal')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <div className="w-[1px] h-8 bg-gray-500/20 mx-2 self-center" />
                                     <input
