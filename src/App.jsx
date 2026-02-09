@@ -1073,7 +1073,7 @@ const HabitTracker = () => {
                 transition={transition}
                 className="w-full px-4 py-6"
               >
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence>
                   {habits.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
