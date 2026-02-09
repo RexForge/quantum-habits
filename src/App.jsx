@@ -1651,10 +1651,12 @@ const HabitTracker = () => {
 
           {/* Animated Indicator Dot */}
           <motion.div
-            className="absolute bottom-0 w-1 h-1 rounded-full"
+            className="absolute bottom-0 w-1 h-1 rounded-full -translate-x-1/2"
             style={{
               backgroundColor: themeColors.primary,
-              left: `calc(${(getActiveTabIndex() * 20 + 10)}% - 2px)`,
+            }}
+            animate={{
+              left: `${getActiveTabIndex() * 20 + 10}%`,
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           />
