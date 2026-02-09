@@ -2928,7 +2928,7 @@ const HabitTracker = () => {
         showReminders && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50 modal-backdrop-safe" onClick={() => setShowReminders(false)}>
             <div
-              className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} w-full mobile-bottom-sheet max-h-[85vh] overflow-y-auto rounded-t-3xl`}
+              className={`bg-panel w-full mobile-bottom-sheet max-h-[85vh] overflow-y-auto rounded-t-3xl`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mobile-sheet-handle" />
