@@ -1363,7 +1363,8 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-6 py-4"
+                className="w-full px-6 py-4"
+                style={{ minHeight: '100vh' }}
               >
 
                 {/* Overview Stats Grid */}
