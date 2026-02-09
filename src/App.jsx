@@ -1323,7 +1323,13 @@ const HabitTracker = () => {
                               >
                                 {isDone && <Check strokeWidth={3} className="w-full h-full p-2 text-white shadow-sm" />}
                               </button>
-                              <span className={`text-[9px] font-black uppercase tracking-tighter ${isToday ? 'text-blue-500 scale-110' : theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              <span
+                                className="text-[9px] font-black uppercase tracking-tighter"
+                                style={{
+                                  color: isToday ? themeColors.primary : (theme === 'dark' ? '#6b7280' : '#9ca3af'),
+                                  transform: isToday ? 'scale(1.1)' : 'scale(1)',
+                                }}
+                              >
                                 {d.toLocaleDateString('en-US', { weekday: 'narrow' })}
                               </span>
                             </div>
