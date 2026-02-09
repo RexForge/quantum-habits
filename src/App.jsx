@@ -1039,7 +1039,11 @@ const HabitTracker = () => {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
-                className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                style={{
+                  background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                  boxShadow: `0_0_10px_${themeColors.primary}80`,
+                }}
+                className="h-full"
               />
             </div>
           </div>
