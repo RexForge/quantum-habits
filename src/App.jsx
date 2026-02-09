@@ -13,6 +13,7 @@ import FeedView from './components/social/FeedView';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { db, storage } from './lib/firebase';
+import { THEMES, getThemeColors } from './lib/themes';
 import { ref, get, set, onValue, off, push } from 'firebase/database';
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
