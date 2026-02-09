@@ -602,7 +602,12 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                 <button
                                     onClick={handlePost}
                                     disabled={posting || (!newPostText.trim() && !imageFile)}
-                                    className={`px-8 py-4 rounded-[1.5rem] font-black tracking-tight transition-all shadow-xl active:scale-95 ${posting || (!newPostText.trim() && !imageFile) ? 'bg-gray-500 text-white opacity-20' : 'bg-blue-600 text-white shadow-blue-500/25'}`}
+                                    className="px-8 py-4 rounded-[1.5rem] font-black tracking-tight transition-all shadow-xl active:scale-95 text-white"
+                                    style={{
+                                        backgroundColor: (posting || (!newPostText.trim() && !imageFile)) ? '#6b7280' : themeColors.primary,
+                                        opacity: (posting || (!newPostText.trim() && !imageFile)) ? 0.2 : 1,
+                                        boxShadow: (posting || (!newPostText.trim() && !imageFile)) ? 'none' : `0 20px 25px -5px ${themeColors.primary}40`,
+                                    }}
                                 >
                                     {posting ? 'Posting...' : 'Share Nexus'}
                                 </button>
