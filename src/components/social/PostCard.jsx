@@ -404,7 +404,8 @@ const PostCard = ({ post, theme, themeColors }) => {
 
                 <button
                     onClick={() => setShowComments(!showComments)}
-                    className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+                    className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
+                    style={{ color: themeColors?.primary || '#3b82f6' }}
                 >
                     Reply <ChevronRight className="w-3 h-3" />
                 </button>
