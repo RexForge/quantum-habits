@@ -384,6 +384,7 @@ const PostCard = ({ post, theme, themeColors }) => {
                         active={reacted === 'like'}
                         onClick={() => handleReact('like')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <ReactionItem
                         icon={<MessageCircle className="w-4 h-4" style={{ color: showComments ? (themeColors?.primary || '#3b82f6') : '#9ca3af' }} />}
@@ -391,11 +392,13 @@ const PostCard = ({ post, theme, themeColors }) => {
                         active={showComments}
                         onClick={() => setShowComments(!showComments)}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <ReactionItem
                         icon={<Share2 className="w-4 h-4 text-gray-400" />}
                         onClick={() => { }} // Share logic
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                 </div>
 
