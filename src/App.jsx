@@ -1644,7 +1644,7 @@ const HabitTracker = () => {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-2xl px-1 pt-2"
         style={{
-          backgroundColor: theme === 'dark' ? 'rgba(3, 7, 30, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          backgroundColor: theme === 'dark' ? 'var(--bg-dark-tinted)' : 'var(--bg-light-tinted)',
           borderTop: theme === 'dark' ? `1px solid ${themeColors.primary}20` : `1px solid ${themeColors.primary}15`,
           paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
         }}
