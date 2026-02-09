@@ -1053,13 +1053,13 @@ const HabitTracker = () => {
 
       {/* Swipeable Content Area */}
       <div
-        className="pb-40 space-y-4 overflow-hidden relative"
+        className="pb-40 overflow-hidden relative"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         <ErrorBoundary>
-          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
             {currentView === 'habits' && (
               <motion.div
                 key="habits"
