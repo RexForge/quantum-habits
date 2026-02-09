@@ -25,6 +25,8 @@
   --radius: 0.75rem;
   --app-height: 100%;
   --blue-glow: 0 0 20px rgba(59, 130, 246, 0.4);
+  --bg-light-tinted: #f5f7fb;
+  --bg-dark-tinted: #0f1620;
 }
 
 .dark {
