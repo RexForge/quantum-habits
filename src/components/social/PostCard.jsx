@@ -386,7 +386,7 @@ const PostCard = ({ post, theme, themeColors }) => {
                         isDark={isDark}
                     />
                     <ReactionItem
-                        icon={<MessageCircle className={`w-4 h-4 ${showComments ? 'text-blue-500' : 'text-gray-400'}`} />}
+                        icon={<MessageCircle className="w-4 h-4" style={{ color: showComments ? (themeColors?.primary || '#3b82f6') : '#9ca3af' }} />}
                         count={commentCount}
                         active={showComments}
                         onClick={() => setShowComments(!showComments)}
