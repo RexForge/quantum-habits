@@ -1225,7 +1225,13 @@ const HabitTracker = () => {
                   Join specialized communities to tackle challenges together.
                 </p>
                 <div className="pt-8">
-                  <Button className="rounded-2xl px-8 py-6 font-black uppercase tracking-widest text-[11px] shadow-xl">
+                  <Button
+                    className="rounded-2xl px-8 py-6 font-black uppercase tracking-widest text-[11px] shadow-xl text-white"
+                    style={{
+                      backgroundColor: themeColors.primary,
+                      boxShadow: `0 20px 25px -5px ${themeColors.primary}40`,
+                    }}
+                  >
                     Explore Hubs
                   </Button>
                 </div>
