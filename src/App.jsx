@@ -1192,6 +1192,7 @@ const HabitTracker = () => {
               >
                 <FeedView
                   theme={theme}
+                  themeColors={themeColors}
                   showCreatePostModal={showCreatePost}
                   setShowCreatePostModal={setShowCreatePost}
                 />
