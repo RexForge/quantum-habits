@@ -917,21 +917,23 @@ const HabitTracker = () => {
   const NavButton = ({ id, label, icon: Icon, active }) => (
     <button
       onClick={() => handleViewChange(id)}
-      className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 transition-all active:scale-95 ${active
-        ? (theme === 'dark' ? 'text-blue-400' : 'text-blue-600')
-        : (theme === 'dark' ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-500')
-        }`}
+      className="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 transition-all active:scale-95 relative"
+      style={{
+        color: active ? themeColors.primary : (theme === 'dark' ? '#6b7280' : '#9ca3af'),
+      }}
     >
       <div className={`relative ${active ? 'scale-110 -translate-y-0.5' : 'scale-100'} transition-all duration-300`}>
         <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5px]' : 'stroke-2'}`} />
-        {active && (
-          <motion.div
-            layoutId="activeTab"
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-            style={{ backgroundColor: themeColors.primary }}
-          />
-        )}
       </div>
+      {active && (
+        <motion.div
+          layoutId="activeTab"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+          style={{ backgroundColor: themeColors.primary }}
+          initial={false}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      )}
       <span className={`text-[8.5px] font-black uppercase tracking-tight mt-1 truncate w-full px-1 ${active ? 'opacity-100' : 'opacity-40'}`}>
         {label}
       </span>
