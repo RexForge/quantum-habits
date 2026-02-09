@@ -2699,24 +2699,63 @@ const HabitTracker = () => {
               </div>
 
               <div className="space-y-6">
+                {/* Color Theme Selection */}
                 <div>
-                  <h4 className="font-medium mb-3">Theme</h4>
+                  <h4 className="font-medium mb-3">App Theme</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Object.entries(THEMES).map(([themeKey, themeData]) => (
+                      <button
+                        key={themeKey}
+                        onClick={() => setColorTheme(themeKey)}
+                        className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                          colorTheme === themeKey
+                            ? `border-blue-500 bg-blue-50 dark:bg-blue-900/30`
+                            : `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
+                        }`}
+                      >
+                        <div className="text-2xl">{themeData.icon}</div>
+                        <div className="flex gap-1">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.primary }}
+                            title={themeData.name}
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.secondary }}
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.accent }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                          {themeData.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Light/Dark Mode Selection */}
+                <div>
+                  <h4 className="font-medium mb-3">Display Mode</h4>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setTheme('light')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${theme === 'light'
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
+                      onClick={() => setThemeMode('light')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${themeMode === 'light'
+                        ? `bg-blue-500 text-white border-blue-500`
+                        : `border-gray-300 dark:border-gray-600 hover:border-gray-400`
                         }`}
                     >
                       <Sun className="w-4 h-4" />
                       Light
                     </button>
                     <button
-                      onClick={() => setTheme('dark')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${theme === 'dark'
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
+                      onClick={() => setThemeMode('dark')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${themeMode === 'dark'
+                        ? `bg-blue-500 text-white border-blue-500`
+                        : `border-gray-300 dark:border-gray-600 hover:border-gray-400`
                         }`}
                     >
                       <Moon className="w-4 h-4" />
