@@ -241,9 +241,9 @@ const HabitForm = ({ onSave, onCancel, theme, habit = null, existingHabits = [],
                             {reminders.map((reminder, index) => (
                                 <div
                                     key={index}
-                                    className={`p-4 rounded-2xl border transition-all ${(theme === 'dark' || theme === 'neon')
-                                        ? 'bg-gray-800/40 border-gray-700 hover:border-gray-600'
-                                        : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
+                                    className={`p-4 rounded-2xl border transition-all bg-panel ${(theme === 'dark' || theme === 'neon')
+                                        ? 'border-gray-700 hover:border-gray-600'
+                                        : 'border-gray-200 shadow-sm hover:shadow-md'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-4">
