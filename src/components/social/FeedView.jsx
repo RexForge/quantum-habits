@@ -450,7 +450,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                             {u.avatar ? (
                                                 <img src={u.avatar} className="w-full h-full object-cover" alt={u.name} />
                                             ) : (
-                                                <span className="font-black text-xs text-blue-500">{u.name.charAt(0)}</span>
+                                                <span className="font-black text-xs" style={{ color: themeColors.primary }}>{u.name.charAt(0)}</span>
                                             )}
                                         </div>
                                     </div>
