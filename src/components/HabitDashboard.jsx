@@ -73,7 +73,7 @@ const HabitDashboard = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${activeTab === tab
               ? 'bg-blue-600 text-white'
-              : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'
+              : `bg-panel ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`
               }`}
           >
             {tab}
