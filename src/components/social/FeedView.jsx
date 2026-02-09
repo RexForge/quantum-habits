@@ -368,7 +368,11 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                 <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className={`w-24 h-24 rounded-[2rem] mb-8 flex items-center justify-center shadow-2xl ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}
+                    className="w-24 h-24 rounded-[2rem] mb-8 flex items-center justify-center shadow-2xl"
+                    style={{
+                        backgroundColor: `${themeColors.primary}15`,
+                        color: themeColors.primary,
+                    }}
                 >
                     <Users className="w-12 h-12" />
                 </motion.div>
