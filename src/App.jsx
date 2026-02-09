@@ -1564,11 +1564,18 @@ const HabitTracker = () => {
               if (currentView === 'feed') setShowCreatePost(true);
               else setShowAddHabit(true);
             }}
-            className={`fixed right-6 mobile-fab transition-all flex items-center justify-center active:scale-90 z-40 ${currentView === 'feed'
-              ? 'bg-indigo-600 shadow-indigo-500/40 hover:bg-indigo-700'
-              : 'bg-blue-600 shadow-blue-500/40 hover:bg-blue-700'
-              } text-white shadow-2xl`}
-            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
+            className="fixed right-6 mobile-fab transition-all flex items-center justify-center active:scale-90 z-40 text-white shadow-2xl"
+            style={{
+              backgroundColor: themeColors.primary,
+              boxShadow: `0 25px 50px -12px ${themeColors.primary}40`,
+              bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.secondary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.primary;
+            }}
           >
             {currentView === 'feed' ? (
               <MessageSquare className="w-6 h-6 stroke-[2.5px]" />
