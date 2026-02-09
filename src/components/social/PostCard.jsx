@@ -423,7 +423,17 @@ const PostCard = ({ post, theme, themeColors }) => {
                                     value={commentText}
                                     onChange={(e) => setCommentText(e.target.value)}
                                     placeholder="Add a comment..."
-                                    className={`flex-1 py-3 px-4 rounded-[1.25rem] text-xs font-bold border-none focus:ring-2 focus:ring-blue-500/20 ${isDark ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-900'}`}
+                                    className={`flex-1 py-3 px-4 rounded-[1.25rem] text-xs font-bold border-none ${isDark ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-900'}`}
+                                    style={{
+                                        focusRingColor: `${themeColors?.primary || '#3b82f6'}40`,
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.outline = 'none';
+                                        e.target.style.boxShadow = `0 0 0 2px ${(themeColors?.primary || '#3b82f6')}40`;
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.boxShadow = 'none';
+                                    }}
                                 />
                                 <button
                                     type="submit"
