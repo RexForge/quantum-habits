@@ -2344,7 +2344,14 @@ const HabitTracker = () => {
                     {user?.email}
                   </p>
 
-                  <div className={`mt-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/30' : 'bg-blue-50 text-blue-600 ring-1 ring-blue-100'}`}>
+                  <div
+                    className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-1"
+                    style={{
+                      backgroundColor: `${themeColors.primary}15`,
+                      color: themeColors.primary,
+                      borderColor: `${themeColors.primary}30`,
+                    }}
+                  >
                     Explorer Status
                   </div>
                 </div>
