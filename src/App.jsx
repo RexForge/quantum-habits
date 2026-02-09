@@ -1212,7 +1212,8 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-6 py-12 text-center"
+                className="w-full px-6 py-12 text-center flex flex-col items-center justify-center"
+                style={{ minHeight: '100vh' }}
               >
                 <div
                   className="w-20 h-20 rounded-[2.5rem] mx-auto flex items-center justify-center mb-6"
