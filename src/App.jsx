@@ -1071,7 +1071,8 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-4 w-full px-4 py-6"
+                className="w-full px-4 py-6"
+                style={{ minHeight: '100vh' }}
               >
                 <AnimatePresence mode="popLayout">
                   {habits.length === 0 ? (
