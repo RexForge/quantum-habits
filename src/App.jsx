@@ -2223,7 +2223,11 @@ const HabitTracker = () => {
                   </button>
                   <button
                     onClick={() => saveHabitNote(editingNote.habitId, editingNote.dateStr, noteText)}
-                    className="flex-[2] py-4 rounded-2xl bg-blue-500 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-blue-500/25"
+                    className="flex-[2] py-4 rounded-2xl text-white font-black text-lg transition-all active:scale-95 shadow-lg"
+                    style={{
+                      backgroundColor: themeColors.primary,
+                      boxShadow: `0 10px 15px -3px ${themeColors.primary}40`,
+                    }}
                   >
                     Save Note
                   </button>
