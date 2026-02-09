@@ -175,14 +175,35 @@ const HabitTracker = () => {
     root.style.setProperty('--color-accent', themeColors.accent);
 
     // Set tinted backgrounds based on theme mode
-    if (themeMode === 'dark') {
-      // Dark mode: blend theme primary color into dark background
-      const primaryColor = themeColors.primary;
-      root.style.setProperty('--bg-dark-tinted', `color-mix(in srgb, ${primaryColor} 8%, #1f2937)`);
-    } else {
-      // Light mode: blend theme primary color into light background
-      const primaryColor = themeColors.primary;
-      root.style.setProperty('--bg-light-tinted', `color-mix(in srgb, ${primaryColor} 6%, #f3f4f6)`);
+    const primaryColor = themeColors.primary;
+
+    // Convert hex to RGB and blend
+    const hexToRgb = (hex) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    };
+
+    const primaryRgb = hexToRgb(primaryColor);
+    if (primaryRgb) {
+      if (themeMode === 'dark') {
+        // Dark mode: 8% blend of primary into #1f2937 (dark gray)
+        const baseRgb = { r: 31, g: 41, b: 55 };
+        const blendedR = Math.round(baseRgb.r + (primaryRgb.r - baseRgb.r) * 0.08);
+        const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.08);
+        const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.08);
+        root.style.setProperty('--bg-dark-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+      } else {
+        // Light mode: 6% blend of primary into #f3f4f6 (light gray)
+        const baseRgb = { r: 243, g: 244, b: 246 };
+        const blendedR = Math.round(baseRgb.r + (primaryRgb.r - baseRgb.r) * 0.06);
+        const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.06);
+        const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.06);
+        root.style.setProperty('--bg-light-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+      }
     }
   }, [themeColors, themeMode]);
 
