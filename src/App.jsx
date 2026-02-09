@@ -1073,8 +1073,9 @@ const HabitTracker = () => {
                 transition={transition}
                 className="w-full px-4 py-6"
               >
-                <AnimatePresence>
-                  {habits.length === 0 ? (
+                <div className="flex flex-col gap-4 w-full">
+                  <AnimatePresence>
+                    {habits.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -1176,7 +1177,8 @@ const HabitTracker = () => {
                       );
                     })
                   )}
-                </AnimatePresence>
+                  </AnimatePresence>
+                </div>
               </motion.div>
             )}
 
@@ -1210,8 +1212,7 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="w-full px-6 py-12 text-center flex flex-col items-center justify-center"
-                style={{ minHeight: '100vh' }}
+                className="w-full px-6 py-12 text-center flex flex-col items-center justify-center gap-4"
               >
                 <div
                   className="w-20 h-20 rounded-[2.5rem] mx-auto flex items-center justify-center mb-6"
@@ -1249,8 +1250,7 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="w-full px-4 py-6"
-                style={{ minHeight: '100vh' }}
+                className="w-full px-4 py-6 flex flex-col gap-6"
               >
                 {habits.length === 0 ? (
                   <div className="text-center py-12">
@@ -1361,8 +1361,7 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="w-full px-6 py-4"
-                style={{ minHeight: '100vh' }}
+                className="w-full px-6 py-4 flex flex-col gap-6"
               >
 
                 {/* Overview Stats Grid */}
