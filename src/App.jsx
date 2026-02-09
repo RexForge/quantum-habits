@@ -2793,20 +2793,24 @@ const HabitTracker = () => {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setThemeMode('light')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${themeMode === 'light'
-                        ? `bg-blue-500 text-white border-blue-500`
-                        : `border-gray-300 dark:border-gray-600 hover:border-gray-400`
-                        }`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-white"
+                      style={{
+                        backgroundColor: themeMode === 'light' ? themeColors.primary : 'transparent',
+                        borderColor: themeMode === 'light' ? themeColors.primary : '#d1d5db',
+                        color: themeMode === 'light' ? 'white' : themeMode === 'dark' ? '#9ca3af' : '#374151',
+                      }}
                     >
                       <Sun className="w-4 h-4" />
                       Light
                     </button>
                     <button
                       onClick={() => setThemeMode('dark')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${themeMode === 'dark'
-                        ? `bg-blue-500 text-white border-blue-500`
-                        : `border-gray-300 dark:border-gray-600 hover:border-gray-400`
-                        }`}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-white"
+                      style={{
+                        backgroundColor: themeMode === 'dark' ? themeColors.primary : 'transparent',
+                        borderColor: themeMode === 'dark' ? themeColors.primary : '#d1d5db',
+                        color: themeMode === 'dark' ? 'white' : themeMode === 'light' ? '#9ca3af' : '#374151',
+                      }}
                     >
                       <Moon className="w-4 h-4" />
                       Dark
