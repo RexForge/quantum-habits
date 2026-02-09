@@ -91,8 +91,7 @@ const HabitDashboard = () => {
             <div
               key={habit.id}
               onClick={() => setSelectedHabitForCalendar(habit)}
-              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                } border border-gray-200/10 shadow-sm`}
+              className={`p-5 rounded-[2.5rem] transition-all cursor-pointer bg-panel border border-gray-200/10 ${theme === 'dark' ? '' : 'shadow-sm'}`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
