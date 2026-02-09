@@ -111,7 +111,9 @@ const HabitTracker = () => {
 
   const transition = {
     x: { type: "tween", ease: "easeInOut", duration: 0.4 },
-    opacity: { duration: 0.2 }
+    opacity: { duration: 0.2 },
+    y: { duration: 0 },
+    layout: { duration: 0 }
   };
 
   // Standard Compatibility Emoji Library
