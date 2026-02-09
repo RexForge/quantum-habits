@@ -438,7 +438,12 @@ const PostCard = ({ post, theme, themeColors }) => {
                                 <button
                                     type="submit"
                                     disabled={!commentText.trim() || sendingComment}
-                                    className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${commentText.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-gray-500/20 text-gray-400'}`}
+                                    className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all text-white"
+                                    style={{
+                                        backgroundColor: commentText.trim() ? (themeColors?.primary || '#3b82f6') : '#80808040',
+                                        color: commentText.trim() ? 'white' : '#9ca3af',
+                                        boxShadow: commentText.trim() ? `0 10px 15px -3px ${(themeColors?.primary || '#3b82f6')}40` : 'none',
+                                    }}
                                 >
                                     <Send className="w-4 h-4" />
                                 </button>
