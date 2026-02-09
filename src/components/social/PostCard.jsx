@@ -351,7 +351,8 @@ const PostCard = ({ post, theme, themeColors }) => {
                         {comments.length > 2 && !showComments && (
                             <button
                                 onClick={() => setShowComments(true)}
-                                className={`text-[10px] font-bold uppercase tracking-widest ml-8 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+                                className="text-[10px] font-bold uppercase tracking-widest ml-8"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
                             >
                                 View all {comments.length} comments
                             </button>
