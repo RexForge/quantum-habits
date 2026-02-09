@@ -2276,9 +2276,9 @@ const HabitTracker = () => {
                     value={noteText}
                     onChange={(e) => setNoteText(e.target.value)}
                     placeholder="Any thoughts? Add a note!"
-                    className={`w-full h-40 p-4 rounded-2xl border-2 transition-all resize-none font-medium focus:ring-0 ${theme === 'dark'
-                      ? 'bg-gray-900 border-gray-700 text-white placeholder-gray-600'
-                      : 'bg-gray-50 border-gray-100 text-gray-800 placeholder-gray-400'
+                    className={`w-full h-40 p-4 rounded-2xl border-2 transition-all resize-none font-medium focus:ring-0 bg-panel ${theme === 'dark'
+                      ? 'border-gray-700 text-white placeholder-gray-600'
+                      : 'border-gray-100 text-gray-800 placeholder-gray-400'
                       }`}
                   />
                 </div>
