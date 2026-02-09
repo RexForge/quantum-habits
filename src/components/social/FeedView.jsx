@@ -382,7 +382,11 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                 </p>
                 <button
                     onClick={loginWithGoogle}
-                    className="w-full max-w-xs py-5 px-8 rounded-[2rem] bg-blue-600 hover:bg-blue-700 text-white font-black text-lg shadow-2xl shadow-blue-500/40 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="w-full max-w-xs py-5 px-8 rounded-[2rem] text-white font-black text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                    style={{
+                        backgroundColor: themeColors.primary,
+                        boxShadow: `0 25px 50px -12px ${themeColors.primary}40`,
+                    }}
                 >
                     <LogIn className="w-6 h-6" />
                     Connect with Google
