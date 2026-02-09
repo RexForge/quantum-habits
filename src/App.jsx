@@ -2757,11 +2757,11 @@ const HabitTracker = () => {
                       <button
                         key={themeKey}
                         onClick={() => setColorTheme(themeKey)}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                          colorTheme === themeKey
-                            ? `border-blue-500 bg-blue-50 dark:bg-blue-900/30`
-                            : `border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600`
-                        }`}
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all"
+                        style={{
+                          borderColor: colorTheme === themeKey ? themeData.primary : undefined,
+                          backgroundColor: colorTheme === themeKey ? `${themeData.primary}15` : undefined,
+                        }}
                       >
                         <div className="text-2xl">{themeData.icon}</div>
                         <div className="flex gap-1">
