@@ -368,9 +368,7 @@ const ClockView = () => {
   // Arc Clock View
   return (
     <div
-      className={`${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-      } rounded-3xl shadow-2xl p-4 md:p-6 border ${
+      className={`bg-panel rounded-3xl shadow-2xl p-4 md:p-6 border ${
         theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
       }`}
     >
