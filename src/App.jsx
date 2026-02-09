@@ -2299,7 +2299,10 @@ const HabitTracker = () => {
                     {/* Camera Edit Badge - Visible on all screens */}
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="absolute bottom-0 right-0 p-2.5 rounded-full bg-blue-500 text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform hover:bg-blue-600"
+                      className="absolute bottom-0 right-0 p-2.5 rounded-full text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform"
+                      style={{
+                        backgroundColor: themeColors.primary,
+                      }}
                       title="Change profile picture"
                     >
                       <Camera className="w-4 h-4" />
