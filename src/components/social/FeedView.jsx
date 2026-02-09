@@ -650,7 +650,13 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                     {error}
                                 </p>
                             )}
-                            <button onClick={() => setActiveFilter('all')} className="text-blue-500 font-bold text-[10px] underline uppercase tracking-widest">Back to Discovery</button>
+                            <button
+                                onClick={() => setActiveFilter('all')}
+                                className="font-bold text-[10px] underline uppercase tracking-widest"
+                                style={{ color: themeColors.primary }}
+                            >
+                                Back to Discovery
+                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
