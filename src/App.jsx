@@ -173,7 +173,18 @@ const HabitTracker = () => {
     root.style.setProperty('--color-primary', themeColors.primary);
     root.style.setProperty('--color-secondary', themeColors.secondary);
     root.style.setProperty('--color-accent', themeColors.accent);
-  }, [themeColors]);
+
+    // Set tinted backgrounds based on theme mode
+    if (themeMode === 'dark') {
+      // Dark mode: blend theme primary color into dark background
+      const primaryColor = themeColors.primary;
+      root.style.setProperty('--bg-dark-tinted', `color-mix(in srgb, ${primaryColor} 8%, #1f2937)`);
+    } else {
+      // Light mode: blend theme primary color into light background
+      const primaryColor = themeColors.primary;
+      root.style.setProperty('--bg-light-tinted', `color-mix(in srgb, ${primaryColor} 6%, #f3f4f6)`);
+    }
+  }, [themeColors, themeMode]);
 
   // Sync Habits with Firestore
   useEffect(() => {
