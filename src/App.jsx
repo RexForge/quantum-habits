@@ -1617,7 +1617,7 @@ const HabitTracker = () => {
           paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
         }}
       >
-        <div className="flex items-center justify-between max-w-lg mx-auto gap-0">
+        <div className="relative flex items-center justify-between max-w-lg mx-auto gap-0">
           <NavButton
             id="habits"
             label="Habits"
@@ -1647,6 +1647,16 @@ const HabitTracker = () => {
             label="Insights"
             icon={TrendingUp}
             active={currentView === 'stats'}
+          />
+
+          {/* Animated Indicator Dot */}
+          <motion.div
+            className="absolute bottom-0 w-1 h-1 rounded-full"
+            style={{
+              backgroundColor: themeColors.primary,
+              left: `calc(${(getActiveTabIndex() * 20 + 10)}% - 2px)`,
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           />
         </div>
       </div>
