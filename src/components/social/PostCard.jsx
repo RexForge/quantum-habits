@@ -6,7 +6,7 @@ import { ref, update, remove, push, set, onValue, off, query as rtdbQuery, order
 import { useAuth } from '../../context/AuthContext';
 import { formatTimeAgo } from '../../utils/timeHelpers';
 
-const PostCard = ({ post, theme }) => {
+const PostCard = ({ post, theme, themeColors }) => {
     const { user } = useAuth();
     const isDark = theme === 'dark';
 
@@ -240,9 +240,24 @@ const PostCard = ({ post, theme }) => {
                             <span className="text-[11px] font-black text-orange-600 tracking-tighter">{post.streak} DAY STREAK</span>
                         </div>
                     ) : (
-                        <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-100 opacity-40'}`}>
-                            <Trophy className="w-3.5 h-3.5 text-blue-500" />
-                            <span className="text-[10px] font-black text-blue-600 tracking-tighter uppercase">Building</span>
+                        <div
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border"
+                            style={{
+                                backgroundColor: `${themeColors?.primary || '#3b82f6'}15`,
+                                borderColor: `${themeColors?.primary || '#3b82f6'}40`,
+                                opacity: 0.4,
+                            }}
+                        >
+                            <Trophy
+                                className="w-3.5 h-3.5"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
+                            />
+                            <span
+                                className="text-[10px] font-black tracking-tighter uppercase"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
+                            >
+                                Building
+                            </span>
                         </div>
                     )}
                 </div>
@@ -336,7 +351,8 @@ const PostCard = ({ post, theme }) => {
                         {comments.length > 2 && !showComments && (
                             <button
                                 onClick={() => setShowComments(true)}
-                                className={`text-[10px] font-bold uppercase tracking-widest ml-8 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+                                className="text-[10px] font-bold uppercase tracking-widest ml-8"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
                             >
                                 View all {comments.length} comments
                             </button>
@@ -368,24 +384,28 @@ const PostCard = ({ post, theme }) => {
                         active={reacted === 'like'}
                         onClick={() => handleReact('like')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <ReactionItem
-                        icon={<MessageCircle className={`w-4 h-4 ${showComments ? 'text-blue-500' : 'text-gray-400'}`} />}
+                        icon={<MessageCircle className="w-4 h-4" style={{ color: showComments ? (themeColors?.primary || '#3b82f6') : '#9ca3af' }} />}
                         count={commentCount}
                         active={showComments}
                         onClick={() => setShowComments(!showComments)}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <ReactionItem
                         icon={<Share2 className="w-4 h-4 text-gray-400" />}
                         onClick={() => { }} // Share logic
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                 </div>
 
                 <button
                     onClick={() => setShowComments(!showComments)}
-                    className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
+                    className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest"
+                    style={{ color: themeColors?.primary || '#3b82f6' }}
                 >
                     Reply <ChevronRight className="w-3 h-3" />
                 </button>
@@ -407,12 +427,27 @@ const PostCard = ({ post, theme }) => {
                                     value={commentText}
                                     onChange={(e) => setCommentText(e.target.value)}
                                     placeholder="Add a comment..."
-                                    className={`flex-1 py-3 px-4 rounded-[1.25rem] text-xs font-bold border-none focus:ring-2 focus:ring-blue-500/20 ${isDark ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-900'}`}
+                                    className={`flex-1 py-3 px-4 rounded-[1.25rem] text-xs font-bold border-none ${isDark ? 'bg-white/5 text-white' : 'bg-gray-100 text-gray-900'}`}
+                                    style={{
+                                        focusRingColor: `${themeColors?.primary || '#3b82f6'}40`,
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.outline = 'none';
+                                        e.target.style.boxShadow = `0 0 0 2px ${(themeColors?.primary || '#3b82f6')}40`;
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.boxShadow = 'none';
+                                    }}
                                 />
                                 <button
                                     type="submit"
                                     disabled={!commentText.trim() || sendingComment}
-                                    className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all ${commentText.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-gray-500/20 text-gray-400'}`}
+                                    className="w-12 h-12 rounded-[1.25rem] flex items-center justify-center transition-all text-white"
+                                    style={{
+                                        backgroundColor: commentText.trim() ? (themeColors?.primary || '#3b82f6') : '#80808040',
+                                        color: commentText.trim() ? 'white' : '#9ca3af',
+                                        boxShadow: commentText.trim() ? `0 10px 15px -3px ${(themeColors?.primary || '#3b82f6')}40` : 'none',
+                                    }}
                                 >
                                     <Send className="w-4 h-4" />
                                 </button>
@@ -425,17 +460,27 @@ const PostCard = ({ post, theme }) => {
     );
 };
 
-const ReactionItem = ({ icon, count, active, onClick, isDark }) => (
+const ReactionItem = ({ icon, count, active, onClick, isDark, themeColors }) => (
     <button
         onClick={onClick}
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-90 ${active
-            ? (isDark ? 'bg-white/10' : 'bg-blue-50')
-            : 'hover:bg-gray-50 dark:hover:bg-white/5'}`}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all active:scale-90"
+        style={{
+            backgroundColor: active ? (isDark ? 'rgba(255,255,255,0.1)' : `${themeColors?.primary || '#3b82f6'}15`) : 'transparent',
+        }}
     >
         <motion.div animate={active ? { scale: [1, 1.4, 1] } : {}} transition={{ duration: 0.3 }}>
             {icon}
         </motion.div>
-        {count > 0 && <span className={`text-[11px] font-black ${active ? (isDark ? 'text-white' : 'text-blue-600') : 'text-gray-400'}`}>{count}</span>}
+        {count > 0 && (
+            <span
+                className="text-[11px] font-black"
+                style={{
+                    color: active ? (isDark ? 'white' : (themeColors?.primary || '#3b82f6')) : '#9ca3af',
+                }}
+            >
+                {count}
+            </span>
+        )}
     </button>
 );
 

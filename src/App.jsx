@@ -13,6 +13,7 @@ import FeedView from './components/social/FeedView';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { db, storage } from './lib/firebase';
+import { THEMES, getThemeColors } from './lib/themes';
 import { ref, get, set, onValue, off, push } from 'firebase/database';
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -29,7 +30,8 @@ const HabitTracker = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('colorTheme') || 'default');
+  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('themeMode') || 'light');
   const [showAddHabit, setShowAddHabit] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [habitForm, setHabitForm] = useState({ name: '', icon: '🎯', color: '#3b82f6' });
@@ -109,7 +111,9 @@ const HabitTracker = () => {
 
   const transition = {
     x: { type: "tween", ease: "easeInOut", duration: 0.4 },
-    opacity: { duration: 0.2 }
+    opacity: { duration: 0.2 },
+    y: { duration: 0 },
+    layout: { duration: 0 }
   };
 
   // Standard Compatibility Emoji Library
@@ -148,13 +152,28 @@ const HabitTracker = () => {
 
   // Firestore Sync & Local Persistence
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    if (theme === 'dark') {
+    localStorage.setItem('colorTheme', colorTheme);
+    localStorage.setItem('themeMode', themeMode);
+    if (themeMode === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme]);
+  }, [colorTheme, themeMode]);
+
+  // For backward compatibility with existing code that uses "theme"
+  const theme = themeMode;
+
+  // Get current theme colors
+  const themeColors = getThemeColors(colorTheme, themeMode);
+
+  // Apply theme CSS variables
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--color-primary', themeColors.primary);
+    root.style.setProperty('--color-secondary', themeColors.secondary);
+    root.style.setProperty('--color-accent', themeColors.accent);
+  }, [themeColors]);
 
   // Sync Habits with Firestore
   useEffect(() => {
@@ -898,25 +917,24 @@ const HabitTracker = () => {
   const NavButton = ({ id, label, icon: Icon, active }) => (
     <button
       onClick={() => handleViewChange(id)}
-      className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 transition-all active:scale-95 ${active
-        ? (theme === 'dark' ? 'text-blue-400' : 'text-blue-600')
-        : (theme === 'dark' ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-500')
-        }`}
+      className="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 transition-all active:scale-95 relative"
+      style={{
+        color: active ? themeColors.primary : (theme === 'dark' ? '#6b7280' : '#9ca3af'),
+      }}
     >
       <div className={`relative ${active ? 'scale-110 -translate-y-0.5' : 'scale-100'} transition-all duration-300`}>
         <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5px]' : 'stroke-2'}`} />
-        {active && (
-          <motion.div
-            layoutId="activeTab"
-            className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${theme === 'dark' ? 'bg-blue-400' : 'bg-blue-600'}`}
-          />
-        )}
       </div>
       <span className={`text-[8.5px] font-black uppercase tracking-tight mt-1 truncate w-full px-1 ${active ? 'opacity-100' : 'opacity-40'}`}>
         {label}
       </span>
     </button>
   );
+
+  const getActiveTabIndex = () => {
+    const tabOrder = ['habits', 'weekly', 'feed', 'groups', 'stats'];
+    return tabOrder.indexOf(currentView);
+  };
 
   return (
     <div className="bg-background text-foreground min-h-screen safe-area-padding">
@@ -941,9 +959,23 @@ const HabitTracker = () => {
                         currentView === 'stats' ? 'Insights' : 'Guilds'}
                 </h1>
                 {currentView === 'feed' && (
-                  <div className="flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500">Live</span>
+                  <div
+                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border"
+                    style={{
+                      backgroundColor: `${themeColors.primary}10`,
+                      borderColor: `${themeColors.primary}40`,
+                    }}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ backgroundColor: themeColors.primary }}
+                    />
+                    <span
+                      className="text-[10px] font-black uppercase tracking-wider"
+                      style={{ color: themeColors.primary }}
+                    >
+                      Live
+                    </span>
                   </div>
                 )}
               </div>
@@ -1008,7 +1040,11 @@ const HabitTracker = () => {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
-                className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                style={{
+                  background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                  boxShadow: `0_0_10px_${themeColors.primary}80`,
+                }}
+                className="h-full"
               />
             </div>
           </div>
@@ -1017,13 +1053,13 @@ const HabitTracker = () => {
 
       {/* Swipeable Content Area */}
       <div
-        className="pb-40 space-y-4 overflow-hidden relative"
+        className="pb-40 overflow-hidden relative"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         <ErrorBoundary>
-          <AnimatePresence mode="popLayout" custom={direction} initial={false}>
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
             {currentView === 'habits' && (
               <motion.div
                 key="habits"
@@ -1033,10 +1069,11 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-4 w-full px-4 py-6"
+                className="w-full px-4 py-6"
               >
-                <AnimatePresence mode="popLayout">
-                  {habits.length === 0 ? (
+                <div className="flex flex-col gap-4 w-full">
+                  <AnimatePresence>
+                    {habits.length === 0 ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -1065,7 +1102,6 @@ const HabitTracker = () => {
                       return (
                         <motion.div
                           key={habit.id}
-                          layout
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -20 }}
@@ -1100,10 +1136,11 @@ const HabitTracker = () => {
                                       setNoteText(habit.notes?.[today] || '');
                                       if (navigator.vibrate) navigator.vibrate(5);
                                     }}
-                                    className={`flex items-center gap-1.5 transition-all active:scale-90 px-1.5 py-0.5 rounded-lg ${habit.notes?.[today]
-                                      ? theme === 'dark' ? 'text-blue-400 bg-blue-400/10' : 'text-blue-600 bg-blue-50'
-                                      : 'text-gray-400 hover:text-gray-500'
-                                      }`}
+                                    className="flex items-center gap-1.5 transition-all active:scale-90 px-1.5 py-0.5 rounded-lg"
+                                    style={{
+                                      color: habit.notes?.[today] ? themeColors.primary : '#9ca3af',
+                                      backgroundColor: habit.notes?.[today] ? `${themeColors.primary}15` : 'transparent',
+                                    }}
                                   >
                                     <FileText className="w-3.5 h-3.5" />
                                     {habit.notes?.[today] && <span className="text-[10px] font-black uppercase tracking-wider">Note</span>}
@@ -1138,7 +1175,8 @@ const HabitTracker = () => {
                       );
                     })
                   )}
-                </AnimatePresence>
+                  </AnimatePresence>
+                </div>
               </motion.div>
             )}
 
@@ -1155,6 +1193,7 @@ const HabitTracker = () => {
               >
                 <FeedView
                   theme={theme}
+                  themeColors={themeColors}
                   showCreatePostModal={showCreatePost}
                   setShowCreatePostModal={setShowCreatePost}
                 />
@@ -1171,9 +1210,15 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-6 py-12 text-center"
+                className="w-full px-6 py-12 text-center flex flex-col items-center justify-center gap-4"
               >
-                <div className={`w-20 h-20 rounded-[2.5rem] ${theme === 'dark' ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'} mx-auto flex items-center justify-center mb-6`}>
+                <div
+                  className="w-20 h-20 rounded-[2.5rem] mx-auto flex items-center justify-center mb-6"
+                  style={{
+                    backgroundColor: `${themeColors.primary}15`,
+                    color: themeColors.primary,
+                  }}
+                >
                   <Users className="w-10 h-10" />
                 </div>
                 <h2 className={`text-2xl font-black ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Guilds & Tribes</h2>
@@ -1181,7 +1226,13 @@ const HabitTracker = () => {
                   Join specialized communities to tackle challenges together.
                 </p>
                 <div className="pt-8">
-                  <Button className="rounded-2xl px-8 py-6 font-black uppercase tracking-widest text-[11px] shadow-xl">
+                  <Button
+                    className="rounded-2xl px-8 py-6 font-black uppercase tracking-widest text-[11px] shadow-xl text-white"
+                    style={{
+                      backgroundColor: themeColors.primary,
+                      boxShadow: `0 20px 25px -5px ${themeColors.primary}40`,
+                    }}
+                  >
                     Explore Hubs
                   </Button>
                 </div>
@@ -1197,7 +1248,7 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-4 py-6"
+                className="w-full px-4 py-6 flex flex-col gap-6"
               >
                 {habits.length === 0 ? (
                   <div className="text-center py-12">
@@ -1262,7 +1313,7 @@ const HabitTracker = () => {
                           const isToday = dStr === today;
 
                           return (
-                            <div key={i} className="flex flex-col items-center gap-2.5 flex-1 min-w-0">
+                            <div key={`${habit.id}-${dStr}`} className="flex flex-col items-center gap-2.5 flex-1 min-w-0">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1280,7 +1331,13 @@ const HabitTracker = () => {
                               >
                                 {isDone && <Check strokeWidth={3} className="w-full h-full p-2 text-white shadow-sm" />}
                               </button>
-                              <span className={`text-[9px] font-black uppercase tracking-tighter ${isToday ? 'text-blue-500 scale-110' : theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              <span
+                                className="text-[9px] font-black uppercase tracking-tighter"
+                                style={{
+                                  color: isToday ? themeColors.primary : (theme === 'dark' ? '#6b7280' : '#9ca3af'),
+                                  transform: isToday ? 'scale(1.1)' : 'scale(1)',
+                                }}
+                              >
                                 {d.toLocaleDateString('en-US', { weekday: 'narrow' })}
                               </span>
                             </div>
@@ -1302,7 +1359,7 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-6 py-4"
+                className="w-full px-6 py-4 flex flex-col gap-6"
               >
 
                 {/* Overview Stats Grid */}
@@ -1529,11 +1586,18 @@ const HabitTracker = () => {
               if (currentView === 'feed') setShowCreatePost(true);
               else setShowAddHabit(true);
             }}
-            className={`fixed right-6 mobile-fab transition-all flex items-center justify-center active:scale-90 z-40 ${currentView === 'feed'
-              ? 'bg-indigo-600 shadow-indigo-500/40 hover:bg-indigo-700'
-              : 'bg-blue-600 shadow-blue-500/40 hover:bg-blue-700'
-              } text-white shadow-2xl`}
-            style={{ bottom: 'calc(env(safe-area-inset-bottom) + 84px)' }}
+            className="fixed right-6 mobile-fab transition-all flex items-center justify-center active:scale-90 z-40 text-white shadow-2xl"
+            style={{
+              backgroundColor: themeColors.primary,
+              boxShadow: `0 25px 50px -12px ${themeColors.primary}40`,
+              bottom: 'calc(env(safe-area-inset-bottom) + 84px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.secondary;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.primary;
+            }}
           >
             {currentView === 'feed' ? (
               <MessageSquare className="w-6 h-6 stroke-[2.5px]" />
@@ -1546,10 +1610,14 @@ const HabitTracker = () => {
 
       {/* BOTTOM NAVIGATION BAR (Strava/Instagram Style) */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ${theme === 'dark' ? 'bg-gray-950/90 border-t border-white/5' : 'bg-white/95 border-t border-gray-100'} backdrop-blur-2xl px-1 pt-2`}
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-2xl px-1 pt-2"
+        style={{
+          backgroundColor: theme === 'dark' ? 'rgba(3, 7, 30, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          borderTop: theme === 'dark' ? `1px solid ${themeColors.primary}20` : `1px solid ${themeColors.primary}15`,
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+        }}
       >
-        <div className="flex items-center justify-between max-w-lg mx-auto gap-0">
+        <div className="relative flex items-center justify-between max-w-lg mx-auto gap-0">
           <NavButton
             id="habits"
             label="Habits"
@@ -1579,6 +1647,18 @@ const HabitTracker = () => {
             label="Insights"
             icon={TrendingUp}
             active={currentView === 'stats'}
+          />
+
+          {/* Animated Indicator Dot */}
+          <motion.div
+            className="absolute bottom-0 w-1 h-1 rounded-full -translate-x-1/2"
+            style={{
+              backgroundColor: themeColors.primary,
+            }}
+            animate={{
+              left: `${getActiveTabIndex() * 20 + 10}%`,
+            }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           />
         </div>
       </div>
@@ -2068,7 +2148,7 @@ const HabitTracker = () => {
 
                         days.push(
                           <button
-                            key={i}
+                            key={`${habit.id}-${dateStr}`}
                             disabled={isFutur}
                             onClick={() => {
                               toggleHabitCompletion(habit.id, date);
@@ -2181,7 +2261,11 @@ const HabitTracker = () => {
                   </button>
                   <button
                     onClick={() => saveHabitNote(editingNote.habitId, editingNote.dateStr, noteText)}
-                    className="flex-[2] py-4 rounded-2xl bg-blue-500 text-white font-black text-lg transition-all active:scale-95 shadow-lg shadow-blue-500/25"
+                    className="flex-[2] py-4 rounded-2xl text-white font-black text-lg transition-all active:scale-95 shadow-lg"
+                    style={{
+                      backgroundColor: themeColors.primary,
+                      boxShadow: `0 10px 15px -3px ${themeColors.primary}40`,
+                    }}
                   >
                     Save Note
                   </button>
@@ -2229,20 +2313,24 @@ const HabitTracker = () => {
                   <div className="relative w-fit mb-4">
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="w-32 h-32 rounded-[300px] overflow-hidden bg-gradient-to-tr from-blue-500 to-violet-500 ring-4 ring-blue-500/20 shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
+                      className="w-32 h-32 rounded-[64px] overflow-hidden shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(to top right, ${themeColors.primary}, ${themeColors.secondary})`,
+                        boxShadow: `0 10px 25px -5px ${themeColors.primary}40, 0 0 0 4px ${themeColors.primary}15`,
+                      }}
                     >
                       {user?.photoURL ? (
-                        <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover rounded-[300px]" />
+                        <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
                         <img
                           src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.uid || 'default'}&backgroundColor=transparent`}
                           alt="Avatar"
-                          className="w-full h-full object-cover p-0.5 rounded-[300px]"
+                          className="w-full h-full object-cover p-0.5"
                         />
                       )}
 
                       {/* Hover Overlay - Desktop */}
-                      <div className="hidden sm:flex absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-[300px] items-center justify-center">
+                      <div className="hidden sm:flex absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-[64px] items-center justify-center">
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center">
                           <Camera className="w-6 h-6 text-white mb-1 mx-auto" />
                           <p className="text-xs font-bold text-white">Change Photo</p>
@@ -2250,10 +2338,14 @@ const HabitTracker = () => {
                       </div>
                     </button>
 
-                    {/* Mobile Edit Badge */}
+                    {/* Camera Edit Badge - Visible on all screens */}
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="sm:hidden absolute bottom-0 right-0 p-2.5 rounded-full bg-blue-500 text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform hover:bg-blue-600"
+                      className="absolute bottom-0 right-0 p-2.5 rounded-full text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform"
+                      style={{
+                        backgroundColor: themeColors.primary,
+                      }}
+                      title="Change profile picture"
                     >
                       <Camera className="w-4 h-4" />
                     </button>
@@ -2273,12 +2365,17 @@ const HabitTracker = () => {
                       >
                         <input
                           autoFocus
-                          className={`bg-transparent border-b-2 border-blue-500 text-xl font-black text-center w-40 outline-none ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                          className={`bg-transparent border-b-2 text-xl font-black text-center w-40 outline-none ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                          style={{ borderColor: themeColors.primary }}
                           value={tempName}
                           onChange={(e) => setTempName(e.target.value)}
                           onBlur={() => setIsEditingName(false)}
                         />
-                        <button type="submit" className="p-1 rounded-full bg-blue-500 text-white">
+                        <button
+                          type="submit"
+                          className="p-1 rounded-full text-white"
+                          style={{ backgroundColor: themeColors.primary }}
+                        >
                           <Check className="w-4 h-4" />
                         </button>
                       </form>
@@ -2301,7 +2398,14 @@ const HabitTracker = () => {
                     {user?.email}
                   </p>
 
-                  <div className={`mt-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/30' : 'bg-blue-50 text-blue-600 ring-1 ring-blue-100'}`}>
+                  <div
+                    className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-1"
+                    style={{
+                      backgroundColor: `${themeColors.primary}15`,
+                      color: themeColors.primary,
+                      borderColor: `${themeColors.primary}30`,
+                    }}
+                  >
                     Explorer Status
                   </div>
                 </div>
@@ -2640,9 +2744,9 @@ const HabitTracker = () => {
             {profilePicModalMode === 'premade' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3">
-                  {premadeAvatars.map((avatar, idx) => (
+                  {premadeAvatars.map((avatar) => (
                     <button
-                      key={idx}
+                      key={avatar.url}
                       onClick={() => selectPremadeAvatar(avatar.url)}
                       disabled={uploadingProfilePic}
                       className={`aspect-square rounded-full overflow-hidden ring-4 transition-all active:scale-90 hover:scale-110 ${
@@ -2692,25 +2796,68 @@ const HabitTracker = () => {
               </div>
 
               <div className="space-y-6">
+                {/* Color Theme Selection */}
                 <div>
-                  <h4 className="font-medium mb-3">Theme</h4>
+                  <h4 className="font-medium mb-3">App Theme</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Object.entries(THEMES).map(([themeKey, themeData]) => (
+                      <button
+                        key={themeKey}
+                        onClick={() => setColorTheme(themeKey)}
+                        className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all"
+                        style={{
+                          borderColor: colorTheme === themeKey ? themeData.primary : undefined,
+                          backgroundColor: colorTheme === themeKey ? `${themeData.primary}15` : undefined,
+                        }}
+                      >
+                        <div className="text-2xl">{themeData.icon}</div>
+                        <div className="flex gap-1">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.primary }}
+                            title={themeData.name}
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.secondary }}
+                          />
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: themeData.accent }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                          {themeData.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Light/Dark Mode Selection */}
+                <div>
+                  <h4 className="font-medium mb-3">Display Mode</h4>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setTheme('light')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${theme === 'light'
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
-                        }`}
+                      onClick={() => setThemeMode('light')}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-white"
+                      style={{
+                        backgroundColor: themeMode === 'light' ? themeColors.primary : 'transparent',
+                        borderColor: themeMode === 'light' ? themeColors.primary : '#d1d5db',
+                        color: themeMode === 'light' ? 'white' : themeMode === 'dark' ? '#9ca3af' : '#374151',
+                      }}
                     >
                       <Sun className="w-4 h-4" />
                       Light
                     </button>
                     <button
-                      onClick={() => setTheme('dark')}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${theme === 'dark'
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'border-gray-300 dark:border-gray-600'
-                        }`}
+                      onClick={() => setThemeMode('dark')}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all text-white"
+                      style={{
+                        backgroundColor: themeMode === 'dark' ? themeColors.primary : 'transparent',
+                        borderColor: themeMode === 'dark' ? themeColors.primary : '#d1d5db',
+                        color: themeMode === 'dark' ? 'white' : themeMode === 'light' ? '#9ca3af' : '#374151',
+                      }}
                     >
                       <Moon className="w-4 h-4" />
                       Dark

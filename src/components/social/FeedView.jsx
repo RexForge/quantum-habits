@@ -8,7 +8,7 @@ import { ref, push, set, onValue, off, query as rtdbQuery, orderByChild, equalTo
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { formatTimeAgo } from '../../utils/timeHelpers';
 
-const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
+const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostModal }) => {
     const { user, loginWithGoogle, loginAnonymously } = useAuth();
     const [posts, setPosts] = useState([]);
     const [activeFilter, setActiveFilter] = useState('all'); // all, milestones, friends, me (visual only)
@@ -368,7 +368,11 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                 <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className={`w-24 h-24 rounded-[2rem] mb-8 flex items-center justify-center shadow-2xl ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}
+                    className="w-24 h-24 rounded-[2rem] mb-8 flex items-center justify-center shadow-2xl"
+                    style={{
+                        backgroundColor: `${themeColors.primary}15`,
+                        color: themeColors.primary,
+                    }}
                 >
                     <Users className="w-12 h-12" />
                 </motion.div>
@@ -378,7 +382,11 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                 </p>
                 <button
                     onClick={loginWithGoogle}
-                    className="w-full max-w-xs py-5 px-8 rounded-[2rem] bg-blue-600 hover:bg-blue-700 text-white font-black text-lg shadow-2xl shadow-blue-500/40 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="w-full max-w-xs py-5 px-8 rounded-[2rem] text-white font-black text-lg shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                    style={{
+                        backgroundColor: themeColors.primary,
+                        boxShadow: `0 25px 50px -12px ${themeColors.primary}40`,
+                    }}
                 >
                     <LogIn className="w-6 h-6" />
                     Connect with Google
@@ -398,6 +406,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                         label="Discovery"
                         onClick={() => setActiveFilter('all')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <FilterIconTab
                         active={activeFilter === 'milestones'}
@@ -405,6 +414,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                         label="Milestones"
                         onClick={() => setActiveFilter('milestones')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <FilterIconTab
                         active={activeFilter === 'me'}
@@ -412,6 +422,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                         label="My Rituals"
                         onClick={() => setActiveFilter('me')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                 </div>
             </div>
@@ -422,7 +433,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                     <div className="mb-10">
                         <div className="flex items-center justify-between mb-4">
                             <p className={`text-[10px] font-black uppercase tracking-widest opacity-50 ${textColor}`}>Active Explorers</p>
-                            <span className="text-[9px] font-bold text-blue-500 flex items-center gap-1">Live <ChevronRight className="w-3 h-3" /></span>
+                            <span className="text-[9px] font-bold flex items-center gap-1" style={{ color: themeColors.primary }}>Live <ChevronRight className="w-3 h-3" /></span>
                         </div>
                         <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide py-1 -mx-2 px-2">
                             {activeUsers.map(u => (
@@ -431,12 +442,18 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                     whileTap={{ scale: 0.9 }}
                                     className="flex flex-col items-center shrink-0 gap-2"
                                 >
-                                    <div className={`w-12 h-12 rounded-2xl p-0.5 ${u.id === user.uid ? 'bg-gradient-to-tr from-blue-500 to-indigo-500 shadow-lg shadow-blue-500/20' : (isDark ? 'bg-white/10' : 'bg-gray-100')}`}>
+                                    <div
+                                        className={`w-12 h-12 rounded-2xl p-0.5 ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}
+                                        style={u.id === user.uid ? {
+                                            background: `linear-gradient(to top right, ${themeColors.primary}, ${themeColors.secondary})`,
+                                            boxShadow: `0 4px 15px ${themeColors.primary}30`,
+                                        } : {}}
+                                    >
                                         <div className={`w-full h-full rounded-[0.8rem] overflow-hidden ${isDark ? 'bg-gray-900' : 'bg-white'} flex items-center justify-center`}>
                                             {u.avatar ? (
                                                 <img src={u.avatar} className="w-full h-full object-cover" alt={u.name} />
                                             ) : (
-                                                <span className="font-black text-xs text-blue-500">{u.name.charAt(0)}</span>
+                                                <span className="font-black text-xs" style={{ color: themeColors.primary }}>{u.name.charAt(0)}</span>
                                             )}
                                         </div>
                                     </div>
@@ -555,6 +572,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                         color="blue"
                                         onClick={() => setPostType('text')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <PostTypeToggle
                                         active={postType === 'reflection'}
@@ -562,6 +580,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                         color="orange"
                                         onClick={() => setPostType('reflection')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <PostTypeToggle
                                         active={postType === 'goal'}
@@ -569,6 +588,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                         color="emerald"
                                         onClick={() => setPostType('goal')}
                                         isDark={isDark}
+                                        themeColors={themeColors}
                                     />
                                     <div className="w-[1px] h-8 bg-gray-500/20 mx-2 self-center" />
                                     <input
@@ -588,7 +608,12 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                 <button
                                     onClick={handlePost}
                                     disabled={posting || (!newPostText.trim() && !imageFile)}
-                                    className={`px-8 py-4 rounded-[1.5rem] font-black tracking-tight transition-all shadow-xl active:scale-95 ${posting || (!newPostText.trim() && !imageFile) ? 'bg-gray-500 text-white opacity-20' : 'bg-blue-600 text-white shadow-blue-500/25'}`}
+                                    className="px-8 py-4 rounded-[1.5rem] font-black tracking-tight transition-all shadow-xl active:scale-95 text-white"
+                                    style={{
+                                        backgroundColor: (posting || (!newPostText.trim() && !imageFile)) ? '#6b7280' : themeColors.primary,
+                                        opacity: (posting || (!newPostText.trim() && !imageFile)) ? 0.2 : 1,
+                                        boxShadow: (posting || (!newPostText.trim() && !imageFile)) ? 'none' : `0 20px 25px -5px ${themeColors.primary}40`,
+                                    }}
                                 >
                                     {posting ? 'Posting...' : 'Share Nexus'}
                                 </button>
@@ -609,7 +634,7 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                         <>
                             {posts.map((post, index) => (
                                 <div key={post.id} ref={index === posts.length - 1 ? lastPostRef : null}>
-                                    <PostCard post={post} theme={theme} />
+                                    <PostCard post={post} theme={theme} themeColors={themeColors} />
                                 </div>
                             ))}
                             {loadingMore && <PostSkeleton isDark={isDark} />}
@@ -631,7 +656,13 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
                                     {error}
                                 </p>
                             )}
-                            <button onClick={() => setActiveFilter('all')} className="text-blue-500 font-bold text-[10px] underline uppercase tracking-widest">Back to Discovery</button>
+                            <button
+                                onClick={() => setActiveFilter('all')}
+                                className="font-bold text-[10px] underline uppercase tracking-widest"
+                                style={{ color: themeColors.primary }}
+                            >
+                                Back to Discovery
+                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -647,29 +678,41 @@ const FeedView = ({ theme, showCreatePostModal, setShowCreatePostModal }) => {
 };
 
 // UI Components for the Feed
-const FilterIconTab = ({ active, icon, label, onClick, isDark }) => (
+const FilterIconTab = ({ active, icon, label, onClick, isDark, themeColors }) => (
     <button
         onClick={onClick}
-        className={`flex items-center gap-2 px-4 py-2 rounded-2xl transition-all whitespace-nowrap font-black text-[10px] uppercase tracking-wider ${active
-            ? (isDark ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white text-gray-900 shadow-md')
-            : (isDark ? 'bg-white/5 text-gray-500 hover:text-gray-300 hover:bg-white/10' : 'bg-gray-100 text-gray-400 hover:text-gray-600')
-            }`}
+        className="flex items-center gap-2 px-4 py-2 rounded-2xl transition-all whitespace-nowrap font-black text-[10px] uppercase tracking-wider"
+        style={{
+            backgroundColor: active
+                ? themeColors?.primary || '#3b82f6'
+                : (isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6'),
+            color: active ? 'white' : (isDark ? '#6b7280' : '#9ca3af'),
+            boxShadow: active ? `0 10px 15px -3px ${themeColors?.primary || '#3b82f6'}40` : 'none',
+        }}
     >
         {icon}
         {label}
     </button>
 );
 
-const PostTypeToggle = ({ active, icon, color, onClick, isDark }) => {
-    const colorClasses = {
-        orange: active ? 'bg-orange-500 text-white' : (isDark ? 'hover:bg-orange-500/10 text-orange-500/50' : 'hover:bg-orange-50 text-orange-500/50'),
-        blue: active ? 'bg-blue-500 text-white' : (isDark ? 'hover:bg-blue-500/10 text-blue-500/50' : 'hover:bg-blue-50 text-blue-500/50'),
-        emerald: active ? 'bg-emerald-500 text-white' : (isDark ? 'hover:bg-emerald-500/10 text-emerald-500/50' : 'hover:bg-emerald-50 text-emerald-500/50')
-    };
+const PostTypeToggle = ({ active, icon, color, onClick, isDark, themeColors }) => {
+    let styleColor;
+    if (color === 'blue') {
+        styleColor = themeColors?.primary || '#3b82f6';
+    } else if (color === 'orange') {
+        styleColor = '#f97316';
+    } else if (color === 'emerald') {
+        styleColor = '#10b981';
+    }
+
     return (
         <button
             onClick={onClick}
-            className={`p-2.5 rounded-xl transition-all active:scale-90 ${colorClasses[color]}`}
+            className="p-2.5 rounded-xl transition-all active:scale-90 text-white"
+            style={{
+                backgroundColor: active ? styleColor : 'transparent',
+                color: active ? 'white' : styleColor,
+            }}
         >
             {icon}
         </button>
