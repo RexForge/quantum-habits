@@ -672,13 +672,17 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
 };
 
 // UI Components for the Feed
-const FilterIconTab = ({ active, icon, label, onClick, isDark }) => (
+const FilterIconTab = ({ active, icon, label, onClick, isDark, themeColors }) => (
     <button
         onClick={onClick}
-        className={`flex items-center gap-2 px-4 py-2 rounded-2xl transition-all whitespace-nowrap font-black text-[10px] uppercase tracking-wider ${active
-            ? (isDark ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-white text-gray-900 shadow-md')
-            : (isDark ? 'bg-white/5 text-gray-500 hover:text-gray-300 hover:bg-white/10' : 'bg-gray-100 text-gray-400 hover:text-gray-600')
-            }`}
+        className="flex items-center gap-2 px-4 py-2 rounded-2xl transition-all whitespace-nowrap font-black text-[10px] uppercase tracking-wider"
+        style={{
+            backgroundColor: active
+                ? themeColors?.primary || '#3b82f6'
+                : (isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6'),
+            color: active ? 'white' : (isDark ? '#6b7280' : '#9ca3af'),
+            boxShadow: active ? `0 10px 15px -3px ${themeColors?.primary || '#3b82f6'}40` : 'none',
+        }}
     >
         {icon}
         {label}
