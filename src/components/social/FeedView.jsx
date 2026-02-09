@@ -439,7 +439,13 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                                     whileTap={{ scale: 0.9 }}
                                     className="flex flex-col items-center shrink-0 gap-2"
                                 >
-                                    <div className={`w-12 h-12 rounded-2xl p-0.5 ${u.id === user.uid ? 'bg-gradient-to-tr from-blue-500 to-indigo-500 shadow-lg shadow-blue-500/20' : (isDark ? 'bg-white/10' : 'bg-gray-100')}`}>
+                                    <div
+                                        className={`w-12 h-12 rounded-2xl p-0.5 ${isDark ? 'bg-white/10' : 'bg-gray-100'}`}
+                                        style={u.id === user.uid ? {
+                                            background: `linear-gradient(to top right, ${themeColors.primary}, ${themeColors.secondary})`,
+                                            boxShadow: `0 4px 15px ${themeColors.primary}30`,
+                                        } : {}}
+                                    >
                                         <div className={`w-full h-full rounded-[0.8rem] overflow-hidden ${isDark ? 'bg-gray-900' : 'bg-white'} flex items-center justify-center`}>
                                             {u.avatar ? (
                                                 <img src={u.avatar} className="w-full h-full object-cover" alt={u.name} />
