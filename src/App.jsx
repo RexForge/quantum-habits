@@ -1251,7 +1251,8 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="space-y-6 w-full px-4 py-6"
+                className="w-full px-4 py-6"
+                style={{ minHeight: '100vh' }}
               >
                 {habits.length === 0 ? (
                   <div className="text-center py-12">
