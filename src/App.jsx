@@ -1354,7 +1354,7 @@ const HabitTracker = () => {
                                 }}
                                 className={`w-full aspect-square rounded-xl transition-all active:scale-90 border-2 shadow-sm ${isDone
                                   ? 'border-transparent'
-                                  : `${theme === 'dark' ? 'bg-gray-900/50 border-gray-700' : 'bg-white border-gray-100'}`
+                                  : `bg-panel ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`
                                   }`}
                                 style={{
                                   backgroundColor: isDone ? habit.color : '',
