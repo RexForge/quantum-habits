@@ -2531,7 +2531,7 @@ const HabitTracker = () => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-t-3xl sm:rounded-3xl p-6 w-full sm:w-[90%] sm:max-w-md shadow-2xl max-h-[85vh] overflow-y-auto`}
+            className={`bg-panel rounded-t-3xl sm:rounded-3xl p-6 w-full sm:w-[90%] sm:max-w-md shadow-2xl max-h-[85vh] overflow-y-auto`}
           >
             {/* Header */}
             {profilePicModalMode !== 'camera' && (
