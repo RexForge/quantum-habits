@@ -162,6 +162,17 @@ const HabitTracker = () => {
   // For backward compatibility with existing code that uses "theme"
   const theme = themeMode;
 
+  // Get current theme colors
+  const themeColors = getThemeColors(colorTheme, themeMode);
+
+  // Apply theme CSS variables
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--color-primary', themeColors.primary);
+    root.style.setProperty('--color-secondary', themeColors.secondary);
+    root.style.setProperty('--color-accent', themeColors.accent);
+  }, [themeColors]);
+
   // Sync Habits with Firestore
   useEffect(() => {
     if (!user) return;
