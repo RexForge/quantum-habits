@@ -2229,20 +2229,20 @@ const HabitTracker = () => {
                   <div className="relative w-fit mb-4">
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="w-32 h-32 rounded-[300px] overflow-hidden bg-gradient-to-tr from-blue-500 to-violet-500 ring-4 ring-blue-500/20 shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
+                      className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-tr from-blue-500 to-violet-500 ring-4 ring-blue-500/20 shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
                     >
                       {user?.photoURL ? (
-                        <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover rounded-[300px]" />
+                        <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
                       ) : (
                         <img
                           src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.uid || 'default'}&backgroundColor=transparent`}
                           alt="Avatar"
-                          className="w-full h-full object-cover p-0.5 rounded-[300px]"
+                          className="w-full h-full object-cover p-0.5"
                         />
                       )}
 
                       {/* Hover Overlay - Desktop */}
-                      <div className="hidden sm:flex absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-[300px] items-center justify-center">
+                      <div className="hidden sm:flex absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 rounded-full items-center justify-center">
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-center">
                           <Camera className="w-6 h-6 text-white mb-1 mx-auto" />
                           <p className="text-xs font-bold text-white">Change Photo</p>
@@ -2250,10 +2250,11 @@ const HabitTracker = () => {
                       </div>
                     </button>
 
-                    {/* Mobile Edit Badge */}
+                    {/* Camera Edit Badge - Visible on all screens */}
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="sm:hidden absolute bottom-0 right-0 p-2.5 rounded-full bg-blue-500 text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform hover:bg-blue-600"
+                      className="absolute bottom-0 right-0 p-2.5 rounded-full bg-blue-500 text-white shadow-lg border-4 border-white dark:border-gray-900 active:scale-90 transition-transform hover:bg-blue-600"
+                      title="Change profile picture"
                     >
                       <Camera className="w-4 h-4" />
                     </button>
