@@ -150,13 +150,17 @@ const HabitTracker = () => {
 
   // Firestore Sync & Local Persistence
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    if (theme === 'dark') {
+    localStorage.setItem('colorTheme', colorTheme);
+    localStorage.setItem('themeMode', themeMode);
+    if (themeMode === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme]);
+  }, [colorTheme, themeMode]);
+
+  // For backward compatibility with existing code that uses "theme"
+  const theme = themeMode;
 
   // Sync Habits with Firestore
   useEffect(() => {
