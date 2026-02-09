@@ -406,6 +406,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                         label="Discovery"
                         onClick={() => setActiveFilter('all')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <FilterIconTab
                         active={activeFilter === 'milestones'}
@@ -413,6 +414,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                         label="Milestones"
                         onClick={() => setActiveFilter('milestones')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                     <FilterIconTab
                         active={activeFilter === 'me'}
@@ -420,6 +422,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                         label="My Rituals"
                         onClick={() => setActiveFilter('me')}
                         isDark={isDark}
+                        themeColors={themeColors}
                     />
                 </div>
             </div>
