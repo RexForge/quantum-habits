@@ -1614,8 +1614,12 @@ const HabitTracker = () => {
 
       {/* BOTTOM NAVIGATION BAR (Strava/Instagram Style) */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ${theme === 'dark' ? 'bg-gray-950/90 border-t border-white/5' : 'bg-white/95 border-t border-gray-100'} backdrop-blur-2xl px-1 pt-2`}
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-2xl px-1 pt-2"
+        style={{
+          backgroundColor: theme === 'dark' ? 'rgba(3, 7, 30, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+          borderTop: theme === 'dark' ? `1px solid ${themeColors.primary}20` : `1px solid ${themeColors.primary}15`,
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)',
+        }}
       >
         <div className="flex items-center justify-between max-w-lg mx-auto gap-0">
           <NavButton
