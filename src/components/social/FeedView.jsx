@@ -634,7 +634,7 @@ const FeedView = ({ theme, themeColors, showCreatePostModal, setShowCreatePostMo
                         <>
                             {posts.map((post, index) => (
                                 <div key={post.id} ref={index === posts.length - 1 ? lastPostRef : null}>
-                                    <PostCard post={post} theme={theme} />
+                                    <PostCard post={post} theme={theme} themeColors={themeColors} />
                                 </div>
                             ))}
                             {loadingMore && <PostSkeleton isDark={isDark} />}
