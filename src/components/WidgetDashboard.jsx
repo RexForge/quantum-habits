@@ -95,10 +95,10 @@ const WidgetDashboard = () => {
 
       {/* 3. Up Next Widget */}
       {metrics.nextTask && (
-        <button 
+        <button
           onClick={() => setViewMode('day')}
-          className={`w-full p-5 rounded-[2.5rem] flex items-center justify-between group transition-all ${
-            theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50 border border-gray-100 shadow-sm'
+          className={`w-full p-5 rounded-[2.5rem] flex items-center justify-between group transition-all bg-panel ${
+            theme === 'dark' ? 'hover:opacity-80' : 'border border-gray-100 shadow-sm hover:shadow-md'
           }`}
         >
           <div className="flex items-center gap-4">
