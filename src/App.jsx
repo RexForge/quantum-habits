@@ -196,6 +196,7 @@ const HabitTracker = () => {
         const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.08);
         const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.08);
         root.style.setProperty('--bg-dark-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+        root.style.setProperty('--bg-dark-tinted-rgb', `${blendedR}, ${blendedG}, ${blendedB}`);
       } else {
         // Light mode: 6% blend of primary into #f3f4f6 (light gray)
         const baseRgb = { r: 243, g: 244, b: 246 };
@@ -203,6 +204,7 @@ const HabitTracker = () => {
         const blendedG = Math.round(baseRgb.g + (primaryRgb.g - baseRgb.g) * 0.06);
         const blendedB = Math.round(baseRgb.b + (primaryRgb.b - baseRgb.b) * 0.06);
         root.style.setProperty('--bg-light-tinted', `rgb(${blendedR}, ${blendedG}, ${blendedB})`);
+        root.style.setProperty('--bg-light-tinted-rgb', `${blendedR}, ${blendedG}, ${blendedB}`);
       }
     }
   }, [themeColors, themeMode]);
