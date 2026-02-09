@@ -2327,7 +2327,7 @@ const HabitTracker = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed inset-y-0 right-0 w-[85%] max-w-sm z-[71] shadow-2xl flex flex-col ${theme === 'dark' ? 'bg-gray-900 border-l border-gray-800' : 'bg-white border-l border-gray-200'}`}
+              className={`fixed inset-y-0 right-0 w-[85%] max-w-sm z-[71] shadow-2xl flex flex-col bg-panel border-l ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
               style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
             >
               <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
