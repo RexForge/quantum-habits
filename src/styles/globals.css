@@ -53,6 +53,24 @@
   --bg-dark-tinted: #0f1620;
 }
 
+/* Tinted Background Utilities */
+.bg-panel-light {
+  background-color: var(--bg-light-tinted);
+}
+
+.dark .bg-panel-dark,
+.bg-panel-light.dark {
+  background-color: var(--bg-dark-tinted);
+}
+
+.bg-panel {
+  background-color: var(--bg-light-tinted);
+}
+
+.dark .bg-panel {
+  background-color: var(--bg-dark-tinted);
+}
+
 /* 1. Mobile Viewport Fix */
 /* Prevents the "bounce" scroll on iOS and handles the mobile keyboard properly */
 html,
