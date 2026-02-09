@@ -30,7 +30,8 @@ const HabitTracker = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const [colorTheme, setColorTheme] = useState(() => localStorage.getItem('colorTheme') || 'default');
+  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('themeMode') || 'light');
   const [showAddHabit, setShowAddHabit] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [habitForm, setHabitForm] = useState({ name: '', icon: '🎯', color: '#3b82f6' });
