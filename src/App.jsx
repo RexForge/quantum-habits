@@ -2282,7 +2282,11 @@ const HabitTracker = () => {
                   <div className="relative w-fit mb-4">
                     <button
                       onClick={() => setShowProfilePicModal(true)}
-                      className="w-32 h-32 rounded-[64px] overflow-hidden bg-gradient-to-tr from-blue-500 to-violet-500 ring-4 ring-blue-500/20 shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
+                      className="w-32 h-32 rounded-[64px] overflow-hidden shadow-2xl relative group transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(to top right, ${themeColors.primary}, ${themeColors.secondary})`,
+                        boxShadow: `0 10px 25px -5px ${themeColors.primary}40, 0 0 0 4px ${themeColors.primary}15`,
+                      }}
                     >
                       {user?.photoURL ? (
                         <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
