@@ -240,9 +240,24 @@ const PostCard = ({ post, theme, themeColors }) => {
                             <span className="text-[11px] font-black text-orange-600 tracking-tighter">{post.streak} DAY STREAK</span>
                         </div>
                     ) : (
-                        <div className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border ${isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-100 opacity-40'}`}>
-                            <Trophy className="w-3.5 h-3.5 text-blue-500" />
-                            <span className="text-[10px] font-black text-blue-600 tracking-tighter uppercase">Building</span>
+                        <div
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border"
+                            style={{
+                                backgroundColor: `${themeColors?.primary || '#3b82f6'}15`,
+                                borderColor: `${themeColors?.primary || '#3b82f6'}40`,
+                                opacity: 0.4,
+                            }}
+                        >
+                            <Trophy
+                                className="w-3.5 h-3.5"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
+                            />
+                            <span
+                                className="text-[10px] font-black tracking-tighter uppercase"
+                                style={{ color: themeColors?.primary || '#3b82f6' }}
+                            >
+                                Building
+                            </span>
                         </div>
                     )}
                 </div>
