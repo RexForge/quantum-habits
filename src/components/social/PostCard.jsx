@@ -6,7 +6,7 @@ import { ref, update, remove, push, set, onValue, off, query as rtdbQuery, order
 import { useAuth } from '../../context/AuthContext';
 import { formatTimeAgo } from '../../utils/timeHelpers';
 
-const PostCard = ({ post, theme }) => {
+const PostCard = ({ post, theme, themeColors }) => {
     const { user } = useAuth();
     const isDark = theme === 'dark';
 
