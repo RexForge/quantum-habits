@@ -969,7 +969,7 @@ const HabitTracker = () => {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen safe-area-padding">
+    <div className="bg-panel text-foreground min-h-screen safe-area-padding">
       {/* Header */}
       {/* Header */}
       {/* Top Header System */}
