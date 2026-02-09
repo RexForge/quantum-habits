@@ -1209,7 +1209,13 @@ const HabitTracker = () => {
                 transition={transition}
                 className="space-y-6 w-full px-6 py-12 text-center"
               >
-                <div className={`w-20 h-20 rounded-[2.5rem] ${theme === 'dark' ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'} mx-auto flex items-center justify-center mb-6`}>
+                <div
+                  className="w-20 h-20 rounded-[2.5rem] mx-auto flex items-center justify-center mb-6"
+                  style={{
+                    backgroundColor: `${themeColors.primary}15`,
+                    color: themeColors.primary,
+                  }}
+                >
                   <Users className="w-10 h-10" />
                 </div>
                 <h2 className={`text-2xl font-black ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Guilds & Tribes</h2>
