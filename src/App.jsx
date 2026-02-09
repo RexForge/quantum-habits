@@ -973,7 +973,12 @@ const HabitTracker = () => {
       {/* Header */}
       {/* Header */}
       {/* Top Header System */}
-      <div className={`sticky top-0 z-40 transition-all duration-300 ${theme === 'dark' ? 'bg-gray-950/80 border-b border-white/5' : 'bg-white/90 border-b border-gray-100'} backdrop-blur-2xl`}>
+      <div className={`sticky top-0 z-40 transition-all duration-300 backdrop-blur-2xl border-b ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}`}
+        style={{
+          backgroundColor: theme === 'dark' ? 'rgba(15, 22, 32, 0.8)' : 'rgba(243, 244, 246, 0.9)',
+          backgroundImage: `linear-gradient(to right, var(--bg-dark-tinted), var(--bg-dark-tinted), transparent)`
+        }}
+      >
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
