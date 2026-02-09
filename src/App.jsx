@@ -2124,7 +2124,7 @@ const HabitTracker = () => {
 
                         days.push(
                           <button
-                            key={i}
+                            key={`${habit.id}-${dateStr}`}
                             disabled={isFutur}
                             onClick={() => {
                               toggleHabitCompletion(habit.id, date);
