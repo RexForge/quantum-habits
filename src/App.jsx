@@ -2323,12 +2323,17 @@ const HabitTracker = () => {
                       >
                         <input
                           autoFocus
-                          className={`bg-transparent border-b-2 border-blue-500 text-xl font-black text-center w-40 outline-none ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                          className={`bg-transparent border-b-2 text-xl font-black text-center w-40 outline-none ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                          style={{ borderColor: themeColors.primary }}
                           value={tempName}
                           onChange={(e) => setTempName(e.target.value)}
                           onBlur={() => setIsEditingName(false)}
                         />
-                        <button type="submit" className="p-1 rounded-full bg-blue-500 text-white">
+                        <button
+                          type="submit"
+                          className="p-1 rounded-full text-white"
+                          style={{ backgroundColor: themeColors.primary }}
+                        >
                           <Check className="w-4 h-4" />
                         </button>
                       </form>
