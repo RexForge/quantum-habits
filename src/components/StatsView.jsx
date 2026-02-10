@@ -1,127 +1,166 @@
-import React, { useMemo } from 'react';
-import { 
-  BarChart, Activity, CheckCircle, Flame, 
-  TrendingUp, Calendar, Zap 
-} from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import React, { useMemo, useState } from 'react';
+import { Flame, CheckCircle } from 'lucide-react';
+import { getHabitStats } from '../utils/statsHelpers';
+import OverallProgressChart from './OverallProgressChart';
+import TrendChart from './TrendChart';
+import HabitStatCard from './HabitStatCard';
+import HabitComparison from './HabitComparison';
+import DayOfWeekChart from './DayOfWeekChart';
+import HabitConsistencyRanking from './HabitConsistencyRanking';
 
-const StatsView = () => {
-  const { tasks, habits, theme } = useAppContext();
+const StatsView = ({ habits = [], theme = 'light' } = {}) => {
+  const [period, setPeriod] = useState('week'); // 'week' or 'alltime'
 
-  // --- Science-Based Analytics ---
   const stats = useMemo(() => {
-    const completedTasks = tasks.filter(t => t.completed).length;
-    const taskRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
-    
-    // Calculate total habit completions over last 30 days
-    const habitCompletionCount = habits.reduce((acc, habit) => {
-      const completions = habit.completions ? Object.values(habit.completions).filter(v => v === 1).length : 0;
-      return acc + completions;
-    }, 0);
+    return getHabitStats(habits);
+  }, [habits]);
 
-    // Dynamic Productivity Score (Algorithm-based)
-    const score = Math.min(100, Math.round((taskRate * 0.6) + (habitCompletionCount * 2)));
+  // Determine hero stat based on selected period
+  const getHeroStat = () => {
+    if (period === 'week') {
+      return {
+        label: 'This week',
+        value: `${stats.weekCompletionRate}%`,
+        subtext: `${stats.weekCompletions} check-ins`
+      };
+    } else {
+      return {
+        label: 'Current streak',
+        value: `${stats.currentStreak}`,
+        subtext: `${stats.currentStreak} day${stats.currentStreak !== 1 ? 's' : ''} in a row`
+      };
+    }
+  };
 
-    return { completedTasks, taskRate, habitCompletionCount, score };
-  }, [tasks, habits]);
+  const heroStat = getHeroStat();
+  const sortedHabits = [...habits].sort((a, b) => {
+    // Sort by current streak descending
+    const streakA = a.completions ? Object.values(a.completions).filter(v => v === 1).length : 0;
+    const streakB = b.completions ? Object.values(b.completions).filter(v => v === 1).length : 0;
+    return streakB - streakA;
+  });
 
   return (
-    <div className="space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
-      {/* 1. The "Pulse" Card - Your Science-based Score */}
-      <div className={`relative overflow-hidden p-6 rounded-[3rem] ${
-        theme === 'dark' ? 'bg-indigo-900/40' : 'bg-blue-600 text-white'
-      } border border-white/10 shadow-xl`}>
-        <div className="relative z-10 flex justify-between items-center">
-          <div>
-            <p className="text-sm font-black uppercase tracking-widest opacity-80 mb-1">Productivity Pulse</p>
-            <h2 className="text-5xl font-black">{stats.score}</h2>
-          </div>
-          <div className="w-20 h-20 rounded-full border-4 border-white/20 flex items-center justify-center">
-            <Zap size={40} fill={theme === 'dark' ? '#818cf8' : 'white'} />
-          </div>
-        </div>
-        {/* Background Decorative Circles */}
-        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-      </div>
+    <div className="space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-      {/* 2. Key Metrics Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className={`p-5 rounded-[2.5rem] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
-          <div className="flex items-center gap-2 text-green-500 mb-2">
-            <CheckCircle size={18} />
-            <span className="text-xs font-bold uppercase">Tasks Done</span>
-          </div>
-          <div className="text-2xl font-black">{stats.completedTasks}</div>
-          <p className="text-[10px] opacity-50 mt-1">Today's Focus</p>
-        </div>
+      {/* --- SECTION 1: Title + Period Selector --- */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Insights</h2>
 
-        <div className={`p-5 rounded-[2.5rem] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
-          <div className="flex items-center gap-2 text-purple-500 mb-2">
-            <Activity size={18} />
-            <span className="text-xs font-bold uppercase">Consistency</span>
-          </div>
-          <div className="text-2xl font-black">{stats.taskRate}%</div>
-          <p className="text-[10px] opacity-50 mt-1">Success Ratio</p>
-        </div>
-      </div>
-
-      {/* 3. Consistency Heatmap (The GitHub Style) */}
-      <div className={`p-6 rounded-[2.5rem] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Calendar size={20} className="text-blue-500" />
-            <h3 className="font-black text-lg">Monthly Intensity</h3>
-          </div>
-          <span className="text-[10px] font-bold opacity-40 uppercase">Last 4 Weeks</span>
-        </div>
-        
-        <div className="flex justify-between gap-1">
-          {[...Array(28)].map((_, i) => {
-            // Logic to simulate heat levels based on completed tasks
-            const intensity = Math.random() > 0.5 ? (Math.random() > 0.5 ? 'bg-blue-600' : 'bg-blue-400') : 'bg-gray-200 dark:bg-gray-700';
-            return (
-              <div 
-                key={i} 
-                className={`flex-1 aspect-square rounded-sm ${intensity} transition-all hover:scale-110 cursor-help`}
-                title={`Level ${i}`}
-              />
-            );
-          })}
-        </div>
-        <div className="flex justify-between mt-2 px-1">
-          <span className="text-[9px] font-bold opacity-30">LESS</span>
-          <span className="text-[9px] font-bold opacity-30">MORE</span>
-        </div>
-      </div>
-
-      {/* 4. Category Breakdown */}
-      <div className={`p-6 rounded-[2.5rem] ${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-sm'} border border-gray-200/10`}>
-        <h3 className="font-black text-lg mb-4 flex items-center gap-2">
-          <TrendingUp size={20} className="text-orange-500" />
-          Focus Distribution
-        </h3>
-        <div className="space-y-4">
+        <div className="flex gap-2">
           {[
-            { label: 'Work', val: 75, color: 'bg-blue-500' },
-            { label: 'Health', val: 45, color: 'bg-green-500' },
-            { label: 'Mind', val: 90, color: 'bg-purple-500' }
-          ].map((cat, i) => (
-            <div key={i}>
-              <div className="flex justify-between text-xs font-bold mb-1 uppercase tracking-tighter">
-                <span>{cat.label}</span>
-                <span>{cat.val}%</span>
-              </div>
-              <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full ${cat.color} transition-all duration-1000`} 
-                  style={{ width: `${cat.val}%` }} 
-                />
-              </div>
-            </div>
+            { label: 'Week', value: 'week' },
+            { label: 'All time', value: 'alltime' }
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setPeriod(opt.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                period === opt.value
+                  ? 'bg-blue-500 text-white'
+                  : theme === 'dark'
+                    ? 'bg-gray-700/50 text-gray-400'
+                    : 'bg-gray-100/80 text-gray-600'
+              }`}
+            >
+              {opt.label}
+            </button>
           ))}
         </div>
       </div>
+
+      {/* --- SECTION 2: Overall Progress Graph (Top) --- */}
+      {habits.length > 0 && <OverallProgressChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 3: Hero Stat --- */}
+      <div className={`p-8 rounded-3xl ${
+        theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'
+      } border border-gray-200/20`}>
+        <p className="text-xs font-semibold opacity-50 mb-3 uppercase tracking-wide">{heroStat.label}</p>
+        <div className="flex items-end gap-2">
+          <h1 className="text-5xl font-black text-blue-600 dark:text-blue-400">
+            {heroStat.value}
+          </h1>
+          {period === 'alltime' && stats.currentStreak > 0 && (
+            <span className="text-2xl mb-2">🔥</span>
+          )}
+        </div>
+        <p className="text-sm opacity-60 mt-3">{heroStat.subtext}</p>
+      </div>
+
+      {/* --- SECTION 4: Overview Card --- */}
+      <div className={`p-6 rounded-3xl ${
+        theme === 'dark' ? 'bg-gray-800/40' : 'bg-white/80'
+      }`}>
+        <h3 className="font-semibold text-xs opacity-50 mb-5 uppercase tracking-widest">Overview</h3>
+
+        <div className="space-y-4">
+          {/* Row 1: Today */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckCircle size={16} className="text-green-500 opacity-80" />
+              <span className="text-sm font-medium">Today</span>
+            </div>
+            <span className="text-sm font-bold">
+              {stats.completedToday}/{stats.totalHabits} ({stats.todayPercentage}%)
+            </span>
+          </div>
+
+          {/* Row 2: This week */}
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-sm font-medium">This week</span>
+            <span className="text-sm font-bold">
+              {stats.weekCompletionRate}% • {stats.weekCompletions} check-ins
+            </span>
+          </div>
+
+          {/* Row 3: Best streak & all-time */}
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-3">
+              <Flame size={16} className="text-orange-500 opacity-80" fill="currentColor" />
+              <span className="text-sm font-medium">Best streak</span>
+            </div>
+            <span className="text-sm font-bold">
+              {stats.bestStreak} days • {stats.allTimeCompletions} all-time
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* --- SECTION 5: Habit Strength Ranking --- */}
+      {habits.length > 0 && <HabitComparison habits={habits} theme={theme} />}
+
+      {/* --- SECTION 6: Productivity by Day of Week --- */}
+      {habits.length > 0 && <DayOfWeekChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 7: Consistency Ranking --- */}
+      {habits.length > 0 && <HabitConsistencyRanking habits={habits} theme={theme} />}
+
+      {/* --- SECTION 8: Individual Habit Details --- */}
+      {sortedHabits.length > 0 && (
+        <div>
+          <h3 className="text-xs font-semibold opacity-50 mb-4 uppercase tracking-widest">
+            Habit details ({sortedHabits.length})
+          </h3>
+          <div className="space-y-3">
+            {sortedHabits.map(habit => (
+              <HabitStatCard
+                key={habit.id}
+                habit={habit}
+                theme={theme}
+                onSelect={() => {}}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {habits.length === 0 && (
+        <div className="text-center py-12 opacity-40">
+          <p className="font-medium">No habits yet. Create one to get started!</p>
+        </div>
+      )}
     </div>
   );
 };
