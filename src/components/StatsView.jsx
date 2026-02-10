@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Flame, CheckCircle } from 'lucide-react';
 import { getHabitStats } from '../utils/statsHelpers';
+import OverallProgressChart from './OverallProgressChart';
 import TrendChart from './TrendChart';
 import HabitStatCard from './HabitStatCard';
 import HabitComparison from './HabitComparison';
@@ -123,19 +124,22 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
         </div>
       </div>
 
-      {/* --- SECTION 4: Habit Strength Ranking --- */}
+      {/* --- SECTION 4: Overall Progress Graph (New) --- */}
+      {habits.length > 0 && <OverallProgressChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 5: Habit Strength Ranking --- */}
       {habits.length > 0 && <HabitComparison habits={habits} theme={theme} />}
 
-      {/* --- SECTION 5: Productivity by Day of Week --- */}
+      {/* --- SECTION 6: Productivity by Day of Week --- */}
       {habits.length > 0 && <DayOfWeekChart habits={habits} theme={theme} />}
 
-      {/* --- SECTION 6: Consistency Ranking --- */}
+      {/* --- SECTION 7: Consistency Ranking --- */}
       {habits.length > 0 && <HabitConsistencyRanking habits={habits} theme={theme} />}
 
-      {/* --- SECTION 7: Detailed Trend --- */}
+      {/* --- SECTION 8: Detailed Trend --- */}
       {habits.length > 0 && <TrendChart habits={habits} theme={theme} />}
 
-      {/* --- SECTION 8: Individual Habit Details --- */}
+      {/* --- SECTION 9: Individual Habit Details --- */}
       {sortedHabits.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold opacity-50 mb-4 uppercase tracking-widest">
