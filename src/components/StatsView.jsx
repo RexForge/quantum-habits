@@ -3,6 +3,9 @@ import { Flame, CheckCircle } from 'lucide-react';
 import { getHabitStats } from '../utils/statsHelpers';
 import TrendChart from './TrendChart';
 import HabitStatCard from './HabitStatCard';
+import HabitComparison from './HabitComparison';
+import DayOfWeekChart from './DayOfWeekChart';
+import HabitConsistencyRanking from './HabitConsistencyRanking';
 
 const StatsView = ({ habits = [], theme = 'light' } = {}) => {
   const [period, setPeriod] = useState('week'); // 'week' or 'alltime'
@@ -120,14 +123,23 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
         </div>
       </div>
 
-      {/* --- SECTION 4: Trend Chart --- */}
-      <TrendChart habits={habits} theme={theme} />
+      {/* --- SECTION 4: Habit Strength Ranking --- */}
+      {habits.length > 0 && <HabitComparison habits={habits} theme={theme} />}
 
-      {/* --- SECTION 5: Habits List --- */}
+      {/* --- SECTION 5: Productivity by Day of Week --- */}
+      {habits.length > 0 && <DayOfWeekChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 6: Consistency Ranking --- */}
+      {habits.length > 0 && <HabitConsistencyRanking habits={habits} theme={theme} />}
+
+      {/* --- SECTION 7: Detailed Trend --- */}
+      {habits.length > 0 && <TrendChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 8: Individual Habit Details --- */}
       {sortedHabits.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold opacity-50 mb-4 uppercase tracking-widest">
-            Habits ({sortedHabits.length})
+            Habit details ({sortedHabits.length})
           </h3>
           <div className="space-y-3">
             {sortedHabits.map(habit => (
