@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import FeedView from './components/social/FeedView';
+import StatsView from './components/StatsView';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './context/AuthContext';
 import { db, storage } from './lib/firebase';
@@ -1397,148 +1398,9 @@ const HabitTracker = () => {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                className="w-full px-6 py-4 flex flex-col gap-6"
+                className="w-full px-6 py-4 overflow-y-auto"
               >
-
-                {/* Overview Stats Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Flame className="w-5 h-5 text-orange-500" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Best Streak</span>
-                    </div>
-                    <div className="text-3xl font-black text-orange-600 dark:text-orange-400">
-                      {getBestStreak()}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">days in a row</div>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-5 h-5 text-blue-500" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</span>
-                    </div>
-                    <div className="text-3xl font-black text-blue-600 dark:text-blue-400">
-                      {getTotalCompletions()}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">completions</div>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="w-5 h-5 text-green-500" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Weekly Rate</span>
-                    </div>
-                    <div className="text-3xl font-black text-green-600 dark:text-green-400">
-                      {Math.min(100, getWeeklyCompletionRate())}%
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Weekly Completion Rate</div>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <BarChart className="w-5 h-5 text-purple-500" />
-                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Today</span>
-                    </div>
-                    <div className="text-3xl font-black text-purple-600 dark:text-purple-400">
-                      {completionRate}%
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{completedToday}/{totalHabits} done</div>
-                  </div>
-                </div>
-
-                {/* Most Consistent Habit */}
-                {getMostConsistentHabit() && (
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <Flame className="w-4 h-4 text-orange-500" />
-                      Most Consistent Habit
-                    </h4>
-                    <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-12 h-12 rounded-full flex items-center justify-center text-xl"
-                          style={{ backgroundColor: getMostConsistentHabit().color }}
-                        >
-                          {getMostConsistentHabit().icon}
-                        </div>
-                        <div className="flex-1">
-                          <h5 className="font-semibold">{getMostConsistentHabit().name}</h5>
-                          <div className="flex items-center gap-2 text-sm text-orange-500 font-medium">
-                            <Flame className="w-4 h-4" />
-                            {getHabitStreak(getMostConsistentHabit())} day streak
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Individual Habit Stats */}
-                <div>
-                  <h4 className="font-semibold mb-3">Habit Performance</h4>
-                  <div className="space-y-3">
-                    {habits.map(habit => {
-                      const streak = getHabitStreak(habit);
-                      const totalDone = habit.completions ? Object.values(habit.completions).filter(v => v).length : 0;
-
-                      // Calculate actual weekly rate for this specific habit
-                      let weekDone = 0;
-                      for (let i = 0; i < 7; i++) {
-                        const d = new Date();
-                        d.setDate(d.getDate() - i);
-                        if (habit.completions?.[d.toDateString()]) weekDone++;
-                      }
-                      const habitWeeklyRate = Math.round((weekDone / 7) * 100);
-
-                      return (
-                        <div
-                          key={habit.id}
-                          className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
-                        >
-                          <div className="flex items-center gap-3 mb-3">
-                            <div
-                              className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                              style={{ backgroundColor: habit.color }}
-                            >
-                              {habit.icon}
-                            </div>
-                            <div className="flex-1">
-                              <h5 className="font-semibold">{habit.name}</h5>
-                              <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-                                <div className="flex items-center gap-1">
-                                  <Flame className="w-3 h-3 text-orange-500" />
-                                  <span>{streak} day streak</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3 text-green-500" />
-                                  <span>{totalDone} total</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Progress Bar */}
-                          <div>
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-gray-600 dark:text-gray-400">Weekly Completion Rate</span>
-                              <span className="font-semibold">{Math.min(100, habitWeeklyRate)}%</span>
-                            </div>
-                            <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                              <div
-                                className="h-2 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${Math.min(100, habitWeeklyRate)}%`,
-                                  backgroundColor: habit.color
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <StatsView habits={habits} theme={themeMode} />
               </motion.div>
             )}
           </AnimatePresence>

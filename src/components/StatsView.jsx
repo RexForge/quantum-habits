@@ -1,12 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Flame, CheckCircle } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
 import { getHabitStats } from '../utils/statsHelpers';
 import TrendChart from './TrendChart';
 import HabitStatCard from './HabitStatCard';
 
-const StatsView = () => {
-  const { habits, theme } = useAppContext();
+const StatsView = ({ habits = [], theme = 'light' } = {}) => {
   const [period, setPeriod] = useState('week'); // 'week' or 'alltime'
 
   const stats = useMemo(() => {
