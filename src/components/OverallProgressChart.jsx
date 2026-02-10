@@ -121,45 +121,80 @@ const OverallProgressChart = ({ habits, theme }) => {
       {view === 'momentum' && (
         <div>
           {/* Line chart showing daily completion count */}
-          <div className="flex items-end justify-between gap-1 h-40 mb-4 pb-4 border-b border-gray-200/10">
-            {momentumData.map((day, idx) => {
-              const barHeight = (day.completions / maxMomentum) * 100;
-              const isToday = idx === momentumData.length - 1;
-              
-              return (
-                <div
-                  key={day.dateStr}
-                  className="flex flex-col items-center flex-1 group cursor-pointer"
-                  title={`${day.dateStr}: ${day.completions}/${habits.length}`}
-                >
-                  <div className="relative w-full flex flex-col items-center">
-                    <div
-                      className={`w-full transition-all rounded-t-sm ${
-                        barHeight === 0
-                          ? 'h-0.5 bg-gray-300/40'
-                          : `${
-                              day.completions === habits.length
-                                ? 'bg-green-500'
-                                : day.completions >= habits.length * 0.7
-                                ? 'bg-blue-500'
-                                : day.completions >= habits.length * 0.4
-                                ? 'bg-yellow-500'
-                                : 'bg-orange-400'
-                            }`
-                      }`}
-                      style={{ height: `${Math.max(barHeight, 2)}%` }}
-                    />
-                  </div>
+          <div className="relative h-32 mb-6 pb-6 border-b border-gray-200/10">
+            <svg className="w-full h-full" viewBox="0 0 700 120" preserveAspectRatio="xMidYMid meet">
+              {/* Grid lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((line) => (
+                <line
+                  key={`grid-${line}`}
+                  x1="0"
+                  y1={120 - line * 120}
+                  x2="700"
+                  y2={120 - line * 120}
+                  stroke={theme === 'dark' ? '#4b5563' : '#e5e7eb'}
+                  strokeDasharray="4"
+                  opacity="0.3"
+                />
+              ))}
 
-                  {/* Labels: show every 5 days or if today */}
-                  {(idx % 5 === 0 || isToday) && (
-                    <span className="text-[9px] font-bold opacity-40 mt-2">
-                      {idx === momentumData.length - 1 ? 'Today' : day.dayNum}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+              {/* Line path */}
+              <polyline
+                points={momentumData
+                  .map((day, idx) => {
+                    const x = (idx / (momentumData.length - 1)) * 700;
+                    const y = 120 - (day.completions / maxMomentum) * 120;
+                    return `${x},${y}`;
+                  })
+                  .join(' ')}
+                fill="none"
+                stroke="url(#lineGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Gradient definition */}
+              <defs>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#10b981" />
+                </linearGradient>
+              </defs>
+
+              {/* Data points */}
+              {momentumData.map((day, idx) => {
+                const x = (idx / (momentumData.length - 1)) * 700;
+                const y = 120 - (day.completions / maxMomentum) * 120;
+                const isToday = idx === momentumData.length - 1;
+
+                return (
+                  <g key={day.dateStr}>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={isToday ? '5' : '3'}
+                      fill={
+                        day.completions === habits.length
+                          ? '#10b981'
+                          : day.completions >= habits.length * 0.7
+                          ? '#3b82f6'
+                          : day.completions >= habits.length * 0.4
+                          ? '#f59e0b'
+                          : '#f97316'
+                      }
+                      opacity={isToday ? '1' : '0.6'}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* X-axis labels */}
+            <div className="flex justify-between px-2 mt-2 text-[9px] font-bold opacity-40">
+              <span>{momentumData[0].dayNum}</span>
+              <span>{momentumData[Math.floor(momentumData.length / 2)].dayNum}</span>
+              <span>Today</span>
+            </div>
           </div>
 
           {/* Stats */}

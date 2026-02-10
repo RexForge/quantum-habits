@@ -69,7 +69,10 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
         </div>
       </div>
 
-      {/* --- SECTION 2: Hero Stat --- */}
+      {/* --- SECTION 2: Overall Progress Graph (Top) --- */}
+      {habits.length > 0 && <OverallProgressChart habits={habits} theme={theme} />}
+
+      {/* --- SECTION 3: Hero Stat --- */}
       <div className={`p-8 rounded-3xl ${
         theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'
       } border border-gray-200/20`}>
@@ -85,7 +88,7 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
         <p className="text-sm opacity-60 mt-3">{heroStat.subtext}</p>
       </div>
 
-      {/* --- SECTION 3: Overview Card --- */}
+      {/* --- SECTION 4: Overview Card --- */}
       <div className={`p-6 rounded-3xl ${
         theme === 'dark' ? 'bg-gray-800/40' : 'bg-white/80'
       }`}>
@@ -123,9 +126,6 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
           </div>
         </div>
       </div>
-
-      {/* --- SECTION 4: Overall Progress Graph (New) --- */}
-      {habits.length > 0 && <OverallProgressChart habits={habits} theme={theme} />}
 
       {/* --- SECTION 5: Habit Strength Ranking --- */}
       {habits.length > 0 && <HabitComparison habits={habits} theme={theme} />}
