@@ -136,10 +136,7 @@ const StatsView = ({ habits = [], theme = 'light' } = {}) => {
       {/* --- SECTION 7: Consistency Ranking --- */}
       {habits.length > 0 && <HabitConsistencyRanking habits={habits} theme={theme} />}
 
-      {/* --- SECTION 8: Detailed Trend --- */}
-      {habits.length > 0 && <TrendChart habits={habits} theme={theme} />}
-
-      {/* --- SECTION 9: Individual Habit Details --- */}
+      {/* --- SECTION 8: Individual Habit Details --- */}
       {sortedHabits.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold opacity-50 mb-4 uppercase tracking-widest">
